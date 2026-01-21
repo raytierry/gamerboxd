@@ -14,7 +14,7 @@ interface GameData {
 
 export async function addToBacklog(game: GameData, status: BacklogStatus = 'WANT_TO_PLAY') {
   const session = await auth();
-  
+
   if (!session?.user?.id) {
     return { success: false, error: 'Not authenticated' };
   }
@@ -59,7 +59,7 @@ export async function addToBacklog(game: GameData, status: BacklogStatus = 'WANT
 
 export async function removeFromBacklog(gameId: number) {
   const session = await auth();
-  
+
   if (!session?.user?.id) {
     return { success: false, error: 'Not authenticated' };
   }
@@ -84,7 +84,7 @@ export async function removeFromBacklog(gameId: number) {
 
 export async function updateBacklogStatus(gameId: number, status: BacklogStatus) {
   const session = await auth();
-  
+
   if (!session?.user?.id) {
     return { success: false, error: 'Not authenticated' };
   }
@@ -110,7 +110,7 @@ export async function updateBacklogStatus(gameId: number, status: BacklogStatus)
 
 export async function getBacklogStatus(gameId: number) {
   const session = await auth();
-  
+
   if (!session?.user?.id) {
     return null;
   }
@@ -133,7 +133,7 @@ export async function getBacklogStatus(gameId: number) {
 
 export async function getUserBacklog() {
   const session = await auth();
-  
+
   if (!session?.user?.id) {
     return [];
   }
