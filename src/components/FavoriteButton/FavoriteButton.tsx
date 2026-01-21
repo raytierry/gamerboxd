@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Heart, Trophy, X, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Heart, Trophy, X, Loader2, ChevronDown } from 'lucide-react';
 import { useFavoriteStatus, useAddToFavorites, useRemoveFromFavorites } from '@/hooks/use-favorites';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -51,83 +50,93 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
 
   if (isLoading) {
     return (
-      <Button variant="outline" disabled className="gap-2">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        Loading...
-      </Button>
+      <div className="h-12 w-40 bg-white/5 rounded-xl animate-pulse" />
     );
   }
 
   return (
     <div className="relative">
-      <Button
-        variant={isFavorite ? 'default' : 'outline'}
+      <button
         onClick={() => setShowRankPicker(!showRankPicker)}
         disabled={isPending}
-        className={`gap-2 ${isFavorite ? 'bg-pink-600 hover:bg-pink-700 border-pink-600' : ''}`}
+        className={`
+          flex items-center gap-2 h-12 px-5 rounded-xl font-medium transition-all duration-200
+          ${isFavorite 
+            ? 'bg-pink-500/10 text-pink-400 border border-pink-400/20' 
+            : 'bg-white/5 hover:bg-white/10 text-white border border-white/10'
+          }
+          ${isPending ? 'opacity-50 cursor-not-allowed' : ''}
+        `}
       >
         {isPending ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Loader2 className="w-5 h-5 animate-spin" />
         ) : (
-          <Heart className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
+          <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
         )}
-        {isFavorite ? `#${currentRank} Favorite` : 'Add to Favorites'}
-      </Button>
+        <span>{isFavorite ? `#${currentRank} Favorite` : 'Favorite'}</span>
+        <ChevronDown className={`w-4 h-4 transition-transform ${showRankPicker ? 'rotate-180' : ''}`} />
+      </button>
 
       <AnimatePresence>
         {showRankPicker && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
-            className="absolute top-full left-0 mt-2 p-4 bg-card border border-border rounded-xl shadow-xl z-50 min-w-[280px]"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Trophy className="h-4 w-4 text-amber-400" />
-                <span className="text-sm font-medium text-foreground">Pick your rank</span>
-              </div>
-              <button
-                onClick={() => setShowRankPicker(false)}
-                className="text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-5 gap-2">
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((rank) => (
-                <motion.button
-                  key={rank}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleRankSelect(rank)}
-                  disabled={isPending}
-                  className={`
-                    relative h-10 w-10 rounded-lg font-bold text-sm
-                    bg-linear-to-br ${RANK_COLORS[rank - 1]}
-                    text-white shadow-md
-                    hover:shadow-lg transition-shadow
-                    disabled:opacity-50
-                    ${currentRank === rank ? 'ring-2 ring-white ring-offset-2 ring-offset-card' : ''}
-                  `}
+          <>
+            <div 
+              className="fixed inset-0 z-40" 
+              onClick={() => setShowRankPicker(false)} 
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 8, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 8, scale: 0.96 }}
+              transition={{ duration: 0.15 }}
+              className="absolute top-full left-0 right-0 sm:right-auto mt-2 p-4 bg-[#1a1a1d] border border-white/10 rounded-xl shadow-xl z-50 sm:min-w-[280px]"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Trophy className="h-4 w-4 text-amber-400" />
+                  <span className="text-sm font-medium text-foreground">Pick your rank</span>
+                </div>
+                <button
+                  onClick={() => setShowRankPicker(false)}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  {rank}
-                </motion.button>
-              ))}
-            </div>
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
 
-            {isFavorite && (
-              <button
-                onClick={handleRemove}
-                disabled={isPending}
-                className="mt-3 w-full py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
-              >
-                Remove from favorites
-              </button>
-            )}
-          </motion.div>
+              <div className="grid grid-cols-5 gap-2">
+                {Array.from({ length: 10 }, (_, i) => i + 1).map((rank) => (
+                  <motion.button
+                    key={rank}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleRankSelect(rank)}
+                    disabled={isPending}
+                    className={`
+                      relative h-10 w-full rounded-lg font-bold text-sm
+                      bg-linear-to-br ${RANK_COLORS[rank - 1]}
+                      text-white shadow-md
+                      hover:shadow-lg transition-shadow
+                      disabled:opacity-50
+                      ${currentRank === rank ? 'ring-2 ring-white ring-offset-2 ring-offset-[#1a1a1d]' : ''}
+                    `}
+                  >
+                    {rank}
+                  </motion.button>
+                ))}
+              </div>
+
+              {isFavorite && (
+                <button
+                  onClick={handleRemove}
+                  disabled={isPending}
+                  className="mt-3 w-full py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
+                >
+                  Remove from favorites
+                </button>
+              )}
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </div>
