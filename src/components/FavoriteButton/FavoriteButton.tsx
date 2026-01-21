@@ -69,27 +69,39 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
     );
   }
 
+  const buttonText = isFavorite ? `#${currentRank} Favorite` : 'Favorite';
+
   return (
     <div className="relative">
       <button
         onClick={() => setShowRankPicker(!showRankPicker)}
         disabled={isPending}
         className={`
-          flex items-center gap-2 h-12 px-5 rounded-xl font-medium transition-all duration-200 border
+          flex items-center gap-2 h-12 px-5 rounded-xl font-medium transition-all duration-200 border min-w-[160px]
           ${isFavorite && rankStyle
             ? `${rankStyle.bg} ${rankStyle.text} ${rankStyle.border}` 
             : 'bg-white/5 hover:bg-white/10 text-white border-white/10'
           }
-          ${isPending ? 'opacity-50 cursor-not-allowed' : ''}
         `}
       >
-        {isPending ? (
-          <Loader2 className="w-5 h-5 animate-spin" />
-        ) : (
-          <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
-        )}
-        <span>{isFavorite ? `#${currentRank} Favorite` : 'Favorite'}</span>
-        <ChevronDown className={`w-4 h-4 transition-transform ${showRankPicker ? 'rotate-180' : ''}`} />
+        <span className="relative w-5 h-5 flex items-center justify-center">
+          <motion.span
+            key={isPending ? 'loading' : 'icon'}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.15 }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            {isPending ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
+            )}
+          </motion.span>
+        </span>
+        <span className="flex-1 text-left">{buttonText}</span>
+        <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showRankPicker ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>

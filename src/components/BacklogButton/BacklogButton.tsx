@@ -68,6 +68,8 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
 
   const currentStatus = backlogEntry?.status;
   const config = currentStatus ? STATUS_CONFIG[currentStatus] : null;
+  const IconComponent = config?.icon || Plus;
+  const buttonText = config?.label || 'Add to Backlog';
 
   return (
     <div className="relative">
@@ -75,28 +77,31 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
         onClick={() => setIsOpen(!isOpen)}
         disabled={isPending}
         className={`
-          flex items-center gap-2 h-12 px-5 rounded-xl font-medium transition-all duration-200
+          flex items-center gap-2 h-12 px-5 rounded-xl font-medium transition-all duration-200 min-w-[180px]
           ${currentStatus 
             ? `${config?.bg} ${config?.color} border border-current/20` 
             : 'bg-indigo-600 hover:bg-indigo-500 text-white'
           }
-          ${isPending ? 'opacity-50 cursor-not-allowed' : ''}
         `}
       >
-        {isPending ? (
-          <Loader2 className="w-5 h-5 animate-spin" />
-        ) : currentStatus ? (
-          <>
-            {config && <config.icon className="w-5 h-5" />}
-            <span>{config?.label}</span>
-          </>
-        ) : (
-          <>
-            <Plus className="w-5 h-5" />
-            <span>Add to Backlog</span>
-          </>
-        )}
-        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <span className="relative w-5 h-5 flex items-center justify-center">
+          <motion.span
+            key={isPending ? 'loading' : 'icon'}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.15 }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            {isPending ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <IconComponent className="w-5 h-5" />
+            )}
+          </motion.span>
+        </span>
+        <span className="flex-1 text-left">{buttonText}</span>
+        <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>
