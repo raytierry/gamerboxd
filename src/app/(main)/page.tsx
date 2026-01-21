@@ -4,9 +4,7 @@ import { ArrowRight, Gamepad2, Trophy, BarChart3, Sparkles } from 'lucide-react'
 export default function HomePage() {
   return (
     <main className="relative">
-      {/* Hero Section */}
       <section className="relative min-h-[90vh] flex items-center overflow-hidden">
-        {/* Animated background */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-transparent to-transparent" />
           <div className="absolute top-1/4 -left-20 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] animate-pulse" />
@@ -14,7 +12,6 @@ export default function HomePage() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/5 rounded-full blur-[150px]" />
         </div>
 
-        {/* Grid pattern */}
         <div 
           className="absolute inset-0 opacity-[0.02]"
           style={{
@@ -25,13 +22,11 @@ export default function HomePage() {
 
         <div className="container mx-auto px-4 py-24 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10 mb-8 backdrop-blur-sm">
               <Sparkles className="w-4 h-4 text-amber-400" />
               <span className="text-sm text-gray-300">Now tracking 500,000+ games</span>
             </div>
 
-            {/* Main heading */}
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.1]">
               <span className="text-white">Your gaming</span>
               <br />
@@ -46,7 +41,6 @@ export default function HomePage() {
               Share your favorites with the world.
             </p>
 
-            {/* CTA buttons */}
             <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/register"
@@ -63,7 +57,6 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* Stats */}
             <div className="mt-20 grid grid-cols-3 gap-8 max-w-lg mx-auto">
               <div>
                 <p className="text-3xl md:text-4xl font-bold text-white">500K+</p>
@@ -81,14 +74,12 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-gray-500">
           <span className="text-xs uppercase tracking-widest">Scroll</span>
           <div className="w-px h-8 bg-gradient-to-b from-gray-500 to-transparent" />
         </div>
       </section>
 
-      {/* Features Section */}
       <section className="py-32 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-950/5 to-transparent" />
         
@@ -124,7 +115,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/10 via-purple-600/10 to-pink-600/10" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
@@ -164,7 +154,6 @@ function FeatureCard({
 }) {
   return (
     <div className="group relative p-8 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all duration-500 hover:-translate-y-1">
-      {/* Glow effect */}
       <div className={`absolute -inset-px rounded-2xl bg-gradient-to-r ${gradient} opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500`} />
       
       <div className={`relative w-14 h-14 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-6 text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>

@@ -45,12 +45,10 @@ export default function RegisterPage() {
 
   return (
     <main className="min-h-screen flex relative overflow-hidden">
-      {/* Background effects */}
       <div className="absolute inset-0 bg-background" />
       <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[150px]" />
       <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[120px]" />
 
-      {/* Back button */}
       <Link
         href="/"
         className="absolute top-6 left-6 flex items-center gap-2 text-gray-400 hover:text-white transition-colors z-10"
@@ -59,10 +57,8 @@ export default function RegisterPage() {
         <span className="text-sm">Back</span>
       </Link>
 
-      {/* Form container */}
       <div className="flex-1 flex items-center justify-center px-4 py-12 relative z-10">
         <div className="w-full max-w-md">
-          {/* Logo */}
           <div className="text-center mb-10">
             <Link href="/" className="inline-flex items-center gap-2 mb-8">
               <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">

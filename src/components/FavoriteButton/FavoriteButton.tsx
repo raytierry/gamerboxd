@@ -14,9 +14,9 @@ interface FavoriteButtonProps {
 }
 
 const RANK_COLORS = [
-  'from-amber-400 to-yellow-500', // 1 - Gold
-  'from-slate-300 to-slate-400',  // 2 - Silver
-  'from-amber-600 to-amber-700',  // 3 - Bronze
+  'from-amber-400 to-yellow-500',
+  'from-slate-300 to-slate-400',
+  'from-amber-600 to-amber-700',
   'from-indigo-400 to-indigo-500',
   'from-purple-400 to-purple-500',
   'from-pink-400 to-pink-500',

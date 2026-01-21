@@ -35,18 +35,14 @@ export default function GameCard({ game }: GameCardProps) {
             </div>
           )}
 
-          {/* Hover overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-          {/* Glow effect on hover */}
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-t from-indigo-500/20 to-transparent" />
           </div>
 
-          {/* Border glow */}
           <div className="absolute inset-0 rounded-xl ring-1 ring-white/10 group-hover:ring-indigo-500/50 transition-all duration-300" />
 
-          {/* Metacritic badge */}
           {game.metacritic && (
             <div
               className={`absolute top-3 right-3 px-2.5 py-1 rounded-lg text-xs font-bold backdrop-blur-md ${
@@ -61,7 +57,6 @@ export default function GameCard({ game }: GameCardProps) {
             </div>
           )}
 
-          {/* Rating stars on hover */}
           {game.rating > 0 && (
             <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 rounded-lg bg-black/60 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
@@ -69,7 +64,6 @@ export default function GameCard({ game }: GameCardProps) {
             </div>
           )}
 
-          {/* Bottom info on hover */}
           <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
             <p className="text-white font-semibold text-sm line-clamp-2 drop-shadow-lg">{game.name}</p>
             {releaseYear && (
@@ -78,7 +72,6 @@ export default function GameCard({ game }: GameCardProps) {
           </div>
         </div>
 
-        {/* Text below card (visible when not hovering) */}
         <div className="mt-3 px-1 group-hover:opacity-0 transition-opacity duration-300">
           <p className="text-foreground font-medium text-sm line-clamp-1">{game.name}</p>
           {releaseYear && (
