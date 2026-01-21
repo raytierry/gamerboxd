@@ -3,48 +3,37 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { register, login } from '@/actions/auth';
+import { register as registerUser, login } from '@/actions/auth';
+import { registerSchema, type RegisterFormData } from '@/schemas/auth.schema';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [serverError, setServerError] = useState('');
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+  });
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const username = formData.get('username') as string;
-    const password = formData.get('password') as string;
-    const confirmPassword = formData.get('confirmPassword') as string;
+  async function onSubmit(data: RegisterFormData) {
+    setServerError('');
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      setLoading(false);
-      return;
-    }
-
-    const result = await register(email, username, password);
+    const result = await registerUser(data.email, data.username, data.password);
 
     if (!result.success) {
-      setError(result.error || 'Registration failed');
-      setLoading(false);
+      setServerError(result.error || 'Registration failed');
       return;
     }
 
-    const loginResult = await login(email, password);
-    
+    const loginResult = await login(data.email, data.password);
+
     if (loginResult.success) {
       router.push('/profile');
       router.refresh();
@@ -61,10 +50,10 @@ export default function RegisterPage() {
           <p className="text-gray-400 mt-2">Start tracking your gaming journey</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {serverError && (
             <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg text-sm">
-              {error}
+              {serverError}
             </div>
           )}
 
@@ -74,12 +63,14 @@ export default function RegisterPage() {
             </label>
             <Input
               id="email"
-              name="email"
               type="email"
-              required
               placeholder="you@example.com"
               className="bg-[#1a1a1d] border-[#2a2a2d] text-white placeholder:text-gray-500"
+              {...register('email')}
             />
+            {errors.email && (
+              <p className="text-red-400 text-sm mt-1">{errors.email.message}</p>
+            )}
           </div>
 
           <div>
@@ -88,12 +79,14 @@ export default function RegisterPage() {
             </label>
             <Input
               id="username"
-              name="username"
               type="text"
-              required
               placeholder="johndoe"
               className="bg-[#1a1a1d] border-[#2a2a2d] text-white placeholder:text-gray-500"
+              {...register('username')}
             />
+            {errors.username && (
+              <p className="text-red-400 text-sm mt-1">{errors.username.message}</p>
+            )}
           </div>
 
           <div>
@@ -102,12 +95,14 @@ export default function RegisterPage() {
             </label>
             <Input
               id="password"
-              name="password"
               type="password"
-              required
               placeholder="••••••••"
               className="bg-[#1a1a1d] border-[#2a2a2d] text-white placeholder:text-gray-500"
+              {...register('password')}
             />
+            {errors.password && (
+              <p className="text-red-400 text-sm mt-1">{errors.password.message}</p>
+            )}
           </div>
 
           <div>
@@ -116,20 +111,22 @@ export default function RegisterPage() {
             </label>
             <Input
               id="confirmPassword"
-              name="confirmPassword"
               type="password"
-              required
               placeholder="••••••••"
               className="bg-[#1a1a1d] border-[#2a2a2d] text-white placeholder:text-gray-500"
+              {...register('confirmPassword')}
             />
+            {errors.confirmPassword && (
+              <p className="text-red-400 text-sm mt-1">{errors.confirmPassword.message}</p>
+            )}
           </div>
 
           <Button
             type="submit"
-            disabled={loading}
+            disabled={isSubmitting}
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
           >
-            {loading ? 'Creating account...' : 'Create account'}
+            {isSubmitting ? 'Creating account...' : 'Create account'}
           </Button>
         </form>
 
