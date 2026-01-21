@@ -25,6 +25,19 @@ const RANK_COLORS = [
   'from-cyan-400 to-cyan-500',
 ];
 
+const RANK_BUTTON_STYLES = [
+  { bg: 'bg-amber-500/15', text: 'text-amber-400', border: 'border-amber-400/30' },
+  { bg: 'bg-slate-400/15', text: 'text-slate-300', border: 'border-slate-400/30' },
+  { bg: 'bg-amber-600/15', text: 'text-amber-500', border: 'border-amber-600/30' },
+  { bg: 'bg-indigo-500/15', text: 'text-indigo-400', border: 'border-indigo-400/30' },
+  { bg: 'bg-purple-500/15', text: 'text-purple-400', border: 'border-purple-400/30' },
+  { bg: 'bg-pink-500/15', text: 'text-pink-400', border: 'border-pink-400/30' },
+  { bg: 'bg-rose-500/15', text: 'text-rose-400', border: 'border-rose-400/30' },
+  { bg: 'bg-orange-500/15', text: 'text-orange-400', border: 'border-orange-400/30' },
+  { bg: 'bg-teal-500/15', text: 'text-teal-400', border: 'border-teal-400/30' },
+  { bg: 'bg-cyan-500/15', text: 'text-cyan-400', border: 'border-cyan-400/30' },
+];
+
 export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: FavoriteButtonProps) {
   const [showRankPicker, setShowRankPicker] = useState(false);
   const { data: favoriteStatus, isLoading } = useFavoriteStatus(gameId);
@@ -34,6 +47,8 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
   const isFavorite = !!favoriteStatus;
   const currentRank = favoriteStatus?.rank;
   const isPending = addToFavorites.isPending || removeFromFavorites.isPending;
+
+  const rankStyle = currentRank ? RANK_BUTTON_STYLES[currentRank - 1] : null;
 
   const handleRankSelect = async (rank: number) => {
     await addToFavorites.mutateAsync({
@@ -60,10 +75,10 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
         onClick={() => setShowRankPicker(!showRankPicker)}
         disabled={isPending}
         className={`
-          flex items-center gap-2 h-12 px-5 rounded-xl font-medium transition-all duration-200
-          ${isFavorite 
-            ? 'bg-pink-500/10 text-pink-400 border border-pink-400/20' 
-            : 'bg-white/5 hover:bg-white/10 text-white border border-white/10'
+          flex items-center gap-2 h-12 px-5 rounded-xl font-medium transition-all duration-200 border
+          ${isFavorite && rankStyle
+            ? `${rankStyle.bg} ${rankStyle.text} ${rankStyle.border}` 
+            : 'bg-white/5 hover:bg-white/10 text-white border-white/10'
           }
           ${isPending ? 'opacity-50 cursor-not-allowed' : ''}
         `}
@@ -85,7 +100,6 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
               onClick={() => setShowRankPicker(false)} 
             />
             
-            {/* Mobile: Bottom sheet */}
             <motion.div
               initial={{ opacity: 0, y: 100 }}
               animate={{ opacity: 1, y: 0 }}
@@ -140,7 +154,6 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
               )}
             </motion.div>
 
-            {/* Desktop: Dropdown */}
             <motion.div
               initial={{ opacity: 0, y: 8, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
