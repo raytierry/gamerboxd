@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum BacklogStatus {
+  WANT_TO_PLAY
+  PLAYING
+  COMPLETED
+  DROPPED
+  ON_HOLD
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  avatarUrl    String?
+  bio          String?
+  createdAt    DateTime @default(now())
+
+  backlogGames  BacklogGame[]
+  favoriteGames FavoriteGame[]
+
+  @@map("users")
+}
+
+model BacklogGame {
+  id        String        @id @default(cuid())
+  userId    String
+  gameId    Int
+  gameSlug  String
+  gameName  String
+  gameImage String?
+  status    BacklogStatus @default(WANT_TO_PLAY)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId])
+  @@map("backlog_games")
+}
+
+model FavoriteGame {
+  id        String   @id @default(cuid())
+  userId    String
+  gameId    Int
+  gameSlug  String
+  gameName  String
+  gameImage String?
+  rank      Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId])
+  @@unique([userId, rank])
+  @@map("favorite_games")
+}
