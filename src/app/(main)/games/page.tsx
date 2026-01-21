@@ -29,37 +29,18 @@ export default function GamesPage() {
     : popularGames?.results || [];
 
   const isLoading = isSearchMode ? isSearching : isLoadingPopular;
-  const showHero = !isSearchMode && games.length === 0 && !isLoading;
 
   return (
     <main className="min-h-screen">
-      <section className="relative py-16 md:py-24">
+      <section className="relative py-8 md:py-12">
         <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 via-transparent to-transparent" />
         
         <div className="container mx-auto px-4 relative">
-          <motion.div 
-            className="max-w-3xl mx-auto text-center mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Discover your next{' '}
-              <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                adventure
-              </span>
-            </h1>
-            <p className="text-gray-400 text-lg">
-              Search through 500,000+ games from all platforms
-            </p>
-          </motion.div>
-
           <div className="max-w-2xl mx-auto">
             <SearchBar
               value={searchQuery}
               onChange={setSearchQuery}
               placeholder="Search for any game..."
-              size="large"
               autoFocus
             />
           </div>
@@ -72,18 +53,18 @@ export default function GamesPage() {
             {isSearchMode ? (
               <motion.div
                 key="search-results"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h2 className="text-xl font-semibold text-white">
+                    <h2 className="text-lg font-medium text-white">
                       Results for "{debouncedQuery}"
                     </h2>
-                    {searchResults?.pages[0]?.count && (
-                      <p className="text-gray-500 text-sm mt-1">
+                    {searchResults?.pages[0]?.count !== undefined && (
+                      <p className="text-gray-500 text-sm">
                         {searchResults.pages[0].count.toLocaleString()} games found
                       </p>
                     )}
@@ -108,18 +89,18 @@ export default function GamesPage() {
             ) : (
               <motion.div
                 key="popular-games"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="flex items-center gap-3 mb-8">
-                  <div className="w-10 h-10 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-yellow-500" />
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-9 h-9 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-lg flex items-center justify-center">
+                    <Sparkles className="w-4 h-4 text-yellow-500" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-semibold text-white">Popular Right Now</h2>
-                    <p className="text-gray-500 text-sm">The highest-rated games</p>
+                    <h2 className="text-lg font-medium text-white">Popular Right Now</h2>
+                    <p className="text-gray-500 text-sm">Highest-rated games</p>
                   </div>
                 </div>
 
