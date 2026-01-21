@@ -113,7 +113,7 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
                     onClick={() => handleRankSelect(rank)}
                     disabled={isPending}
                     className={`
-                      relative h-10 w-full rounded-lg font-bold text-sm
+                      aspect-square rounded-lg font-bold text-sm
                       bg-linear-to-br ${RANK_COLORS[rank - 1]}
                       text-white shadow-md
                       hover:shadow-lg transition-shadow
