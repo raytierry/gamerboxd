@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { PushButton } from '@/components/PushButton';
 import { FadeIn, FadeInUp, StaggerContainer, StaggerItem } from '@/components/Motion';
 import { User, LogOut, Gamepad2, Clock, CheckCircle, XCircle, Pause, Heart, Trophy } from 'lucide-react';
 import { useUserBacklog } from '@/hooks/use-backlog';
@@ -85,16 +84,13 @@ export default function ProfilePage() {
                 <p className="text-muted-foreground">{session.user.email}</p>
               </div>
             </div>
-            <PushButton
-              variant="outline"
-              size="sm"
+            <button
               onClick={handleSignOut}
+              className="flex items-center gap-2 h-10 px-4 rounded-xl font-medium bg-white/5 hover:bg-white/10 text-white border border-white/10 transition-all duration-200"
             >
-              <span className="flex items-center gap-2">
-                <LogOut className="h-4 w-4" />
-                Sign out
-              </span>
-            </PushButton>
+              <LogOut className="h-4 w-4" />
+              Sign out
+            </button>
           </div>
         </FadeInUp>
 
@@ -234,9 +230,12 @@ export default function ProfilePage() {
                   <p className="text-muted-foreground mb-6">
                     Start by searching for games and adding them to your backlog
                   </p>
-                  <PushButton onClick={() => router.push('/games')} size="sm">
+                  <button
+                    onClick={() => router.push('/games')}
+                    className="px-6 py-3 bg-linear-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-medium rounded-xl transition-all duration-200"
+                  >
                     Discover Games
-                  </PushButton>
+                  </button>
                 </div>
               )}
             </>
@@ -290,9 +289,12 @@ export default function ProfilePage() {
                   <p className="text-muted-foreground mb-6">
                     Add your top 10 favorite games to create your personal tierlist
                   </p>
-                  <PushButton onClick={() => router.push('/games')} size="sm">
+                  <button
+                    onClick={() => router.push('/games')}
+                    className="px-6 py-3 bg-linear-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-medium rounded-xl transition-all duration-200"
+                  >
                     Find Games to Love
-                  </PushButton>
+                  </button>
                 </div>
               )}
             </>
