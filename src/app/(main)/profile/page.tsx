@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
+import { PushButton } from '@/components/PushButton';
 import { FadeIn, FadeInUp, StaggerContainer, StaggerItem } from '@/components/Motion';
 import { User, LogOut, Gamepad2, Clock, CheckCircle, XCircle, Pause, Heart, Trophy } from 'lucide-react';
 import { useUserBacklog } from '@/hooks/use-backlog';
@@ -85,14 +85,16 @@ export default function ProfilePage() {
                 <p className="text-muted-foreground">{session.user.email}</p>
               </div>
             </div>
-            <Button
+            <PushButton
               variant="outline"
+              size="sm"
               onClick={handleSignOut}
-              className="gap-2"
             >
-              <LogOut className="h-4 w-4" />
-              Sign out
-            </Button>
+              <span className="flex items-center gap-2">
+                <LogOut className="h-4 w-4" />
+                Sign out
+              </span>
+            </PushButton>
           </div>
         </FadeInUp>
 
@@ -232,12 +234,9 @@ export default function ProfilePage() {
                   <p className="text-muted-foreground mb-6">
                     Start by searching for games and adding them to your backlog
                   </p>
-                  <Button
-                    onClick={() => router.push('/games')}
-                    className="bg-indigo-600 hover:bg-indigo-700"
-                  >
+                  <PushButton onClick={() => router.push('/games')} size="sm">
                     Discover Games
-                  </Button>
+                  </PushButton>
                 </div>
               )}
             </>
@@ -291,12 +290,9 @@ export default function ProfilePage() {
                   <p className="text-muted-foreground mb-6">
                     Add your top 10 favorite games to create your personal tierlist
                   </p>
-                  <Button
-                    onClick={() => router.push('/games')}
-                    className="bg-indigo-600 hover:bg-indigo-700"
-                  >
+                  <PushButton onClick={() => router.push('/games')} size="sm">
                     Find Games to Love
-                  </Button>
+                  </PushButton>
                 </div>
               )}
             </>

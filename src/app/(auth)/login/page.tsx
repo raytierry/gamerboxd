@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PushButton } from '@/components/PushButton';
 import { login } from '@/actions/auth';
 import { loginSchema, type LoginFormData } from '@/schemas/auth.schema';
 import { Gamepad2, ArrowLeft, Loader2 } from 'lucide-react';
@@ -54,7 +54,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           <div className="text-center mb-10">
             <Link href="/" className="inline-flex items-center gap-2 mb-8">
-              <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <div className="w-12 h-12 bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
                 <Gamepad2 className="w-6 h-6 text-white" />
               </div>
             </Link>
@@ -101,24 +101,20 @@ export default function LoginPage() {
               )}
             </div>
 
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full h-12 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30"
-            >
+            <PushButton type="submit" disabled={isSubmitting} className="w-full">
               {isSubmitting ? (
-                <span className="flex items-center gap-2">
+                <span className="flex items-center justify-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Signing in...
                 </span>
               ) : (
                 'Sign in'
               )}
-            </Button>
+            </PushButton>
           </form>
 
           <p className="text-center text-gray-400 mt-8">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link href="/register" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
               Create one
             </Link>

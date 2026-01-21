@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PushButton } from '@/components/PushButton';
 import { register as registerUser, login } from '@/actions/auth';
 import { registerSchema, type RegisterFormData } from '@/schemas/auth.schema';
 import { Gamepad2, ArrowLeft, Loader2 } from 'lucide-react';
@@ -140,20 +140,16 @@ export default function RegisterPage() {
               )}
             </div>
 
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full h-12 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30"
-            >
+            <PushButton type="submit" disabled={isSubmitting} className="w-full">
               {isSubmitting ? (
-                <span className="flex items-center gap-2">
+                <span className="flex items-center justify-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Creating account...
                 </span>
               ) : (
                 'Create account'
               )}
-            </Button>
+            </PushButton>
           </form>
 
           <p className="text-center text-gray-400 mt-8">

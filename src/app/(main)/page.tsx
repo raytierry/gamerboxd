@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight, Gamepad2, Trophy, BarChart3, Sparkles } from 'lucide-react';
+import { PushButton } from '@/components/PushButton';
 
 export default function HomePage() {
   return (
@@ -42,19 +43,15 @@ export default function HomePage() {
             </p>
 
             <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                href="/register"
-                className="group relative px-8 py-4 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-semibold rounded-xl transition-all duration-300 flex items-center gap-2 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-105"
-              >
-                Start your journey
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link
-                href="/games"
-                className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 backdrop-blur-sm"
-              >
+              <PushButton href="/register" size="lg">
+                <span className="flex items-center gap-2">
+                  Start your journey
+                  <ArrowRight className="w-5 h-5" />
+                </span>
+              </PushButton>
+              <PushButton href="/games" variant="outline" size="lg">
                 Explore games
-              </Link>
+              </PushButton>
             </div>
 
             <div className="mt-20 grid grid-cols-3 gap-8 max-w-lg mx-auto">
@@ -127,13 +124,12 @@ export default function HomePage() {
             <p className="text-lg text-gray-400 mb-10">
               Join thousands of gamers tracking their journey. It's free, forever.
             </p>
-            <Link
-              href="/register"
-              className="inline-flex items-center gap-2 px-10 py-5 bg-white text-gray-900 font-bold rounded-xl hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-2xl"
-            >
-              Create your account
-              <ArrowRight className="w-5 h-5" />
-            </Link>
+            <PushButton href="/register" variant="outline" size="lg">
+              <span className="flex items-center gap-2">
+                Create your account
+                <ArrowRight className="w-5 h-5" />
+              </span>
+            </PushButton>
           </div>
         </div>
       </section>
