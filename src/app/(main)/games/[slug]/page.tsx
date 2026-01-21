@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, Star, Monitor } from 'lucide-react';
+import GameActions from '@/components/GameActions';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -105,6 +106,17 @@ export default async function GamePage({ params }: PageProps) {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <GameActions
+            game={{
+              id: game.id,
+              slug: game.slug,
+              name: game.name,
+              background_image: game.background_image,
+            }}
+          />
+        </div>
+
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             {game.description_raw && (
