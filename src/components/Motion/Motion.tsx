@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, type Variants, type HTMLMotionProps } from 'motion/react';
+import { motion, useReducedMotion, type Variants, type HTMLMotionProps } from 'motion/react';
 
 const fadeIn: Variants = {
   hidden: { opacity: 0 },
@@ -37,6 +37,11 @@ const staggerItem: Variants = {
   visible: { opacity: 1, y: 0 },
 };
 
+const reducedVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+};
+
 export const variants = {
   fadeIn,
   fadeInUp,
@@ -51,13 +56,22 @@ type MotionDivProps = HTMLMotionProps<'div'> & {
   delay?: number;
 };
 
+function getTransition(shouldReduce: boolean | null, delay: number) {
+  if (shouldReduce) {
+    return { duration: 0.01, delay: 0 };
+  }
+  return { duration: 0.4, delay, ease: 'easeOut' };
+}
+
 export function FadeIn({ children, delay = 0, ...props }: MotionDivProps) {
+  const shouldReduce = useReducedMotion();
+
   return (
     <motion.div
       initial="hidden"
       animate="visible"
-      variants={fadeIn}
-      transition={{ duration: 0.4, delay, ease: 'easeOut' }}
+      variants={shouldReduce ? reducedVariants : fadeIn}
+      transition={getTransition(shouldReduce, delay)}
       {...props}
     >
       {children}
@@ -66,12 +80,14 @@ export function FadeIn({ children, delay = 0, ...props }: MotionDivProps) {
 }
 
 export function FadeInUp({ children, delay = 0, ...props }: MotionDivProps) {
+  const shouldReduce = useReducedMotion();
+
   return (
     <motion.div
       initial="hidden"
       animate="visible"
-      variants={fadeInUp}
-      transition={{ duration: 0.4, delay, ease: 'easeOut' }}
+      variants={shouldReduce ? reducedVariants : fadeInUp}
+      transition={getTransition(shouldReduce, delay)}
       {...props}
     >
       {children}
@@ -80,12 +96,14 @@ export function FadeInUp({ children, delay = 0, ...props }: MotionDivProps) {
 }
 
 export function ScaleIn({ children, delay = 0, ...props }: MotionDivProps) {
+  const shouldReduce = useReducedMotion();
+
   return (
     <motion.div
       initial="hidden"
       animate="visible"
-      variants={scaleIn}
-      transition={{ duration: 0.3, delay, ease: 'easeOut' }}
+      variants={shouldReduce ? reducedVariants : scaleIn}
+      transition={getTransition(shouldReduce, delay)}
       {...props}
     >
       {children}
@@ -94,11 +112,13 @@ export function ScaleIn({ children, delay = 0, ...props }: MotionDivProps) {
 }
 
 export function StaggerContainer({ children, ...props }: MotionDivProps) {
+  const shouldReduce = useReducedMotion();
+
   return (
     <motion.div
       initial="hidden"
       animate="visible"
-      variants={staggerContainer}
+      variants={shouldReduce ? reducedVariants : staggerContainer}
       {...props}
     >
       {children}
@@ -107,8 +127,14 @@ export function StaggerContainer({ children, ...props }: MotionDivProps) {
 }
 
 export function StaggerItem({ children, ...props }: MotionDivProps) {
+  const shouldReduce = useReducedMotion();
+
   return (
-    <motion.div variants={staggerItem} {...props}>
+    <motion.div
+      variants={shouldReduce ? reducedVariants : staggerItem}
+      transition={shouldReduce ? { duration: 0.01 } : undefined}
+      {...props}
+    >
       {children}
     </motion.div>
   );

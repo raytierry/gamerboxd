@@ -10,7 +10,7 @@ import {
   type ConflictingGame,
   type ConflictResolution,
 } from '@/hooks/use-favorites';
-import { motion, AnimatePresence, useDragControls, PanInfo } from 'motion/react';
+import { motion, AnimatePresence, useDragControls, useReducedMotion, PanInfo } from 'motion/react';
 import { FavoriteConflictModal } from '@/components/FavoriteConflictModal';
 
 interface FavoriteButtonProps {
@@ -46,6 +46,7 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
   });
 
   const dragControls = useDragControls();
+  const shouldReduce = useReducedMotion();
 
   const { data: favoriteStatus, isLoading } = useFavoriteStatus(gameId);
   const { data: usedRanksData = [] } = useUsedRanks();
@@ -59,6 +60,14 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
   const usedRanks = usedRanksData
     .filter((r) => r.gameId !== gameId)
     .map((r) => r.rank);
+
+  const springTransition = shouldReduce 
+    ? { duration: 0.01 } 
+    : { type: 'spring', damping: 25, stiffness: 300 };
+
+  const fadeTransition = shouldReduce 
+    ? { duration: 0.01 } 
+    : { duration: 0.15 };
 
   const handleRankSelect = async (rank: number) => {
     const result = await addToFavorites.mutateAsync({
@@ -132,10 +141,10 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
           <span className="relative w-4 h-4 flex items-center justify-center">
             <motion.span
               key={isPending ? 'loading' : 'icon'}
-              initial={{ opacity: 0, scale: 0.8 }}
+              initial={shouldReduce ? false : { opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.15 }}
+              exit={shouldReduce ? undefined : { opacity: 0, scale: 0.8 }}
+              transition={fadeTransition}
               className="absolute inset-0 flex items-center justify-center"
             >
               {isPending ? (
@@ -158,11 +167,11 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
               />
               
               <motion.div
-                initial={{ y: '100%' }}
-                animate={{ y: 0 }}
-                exit={{ y: '100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                drag="y"
+                initial={shouldReduce ? { opacity: 0 } : { y: '100%' }}
+                animate={shouldReduce ? { opacity: 1 } : { y: 0 }}
+                exit={shouldReduce ? { opacity: 0 } : { y: '100%' }}
+                transition={springTransition}
+                drag={shouldReduce ? false : 'y'}
                 dragControls={dragControls}
                 dragListener={false}
                 dragConstraints={{ top: 0, bottom: 0 }}
@@ -199,7 +208,7 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
                     return (
                       <motion.button
                         key={rank}
-                        whileTap={{ scale: 0.95 }}
+                        whileTap={shouldReduce ? undefined : { scale: 0.95 }}
                         onClick={() => handleRankSelect(rank)}
                         disabled={isPending}
                         className={`
@@ -230,10 +239,10 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                transition={{ duration: 0.15 }}
+                initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.96 }}
+                animate={shouldReduce ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+                exit={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.96 }}
+                transition={fadeTransition}
                 className="hidden sm:block absolute top-full left-0 mt-2 p-3 rounded-2xl shadow-xl z-50 border border-white/10"
                 style={{
                   background: 'linear-gradient(145deg, rgba(30, 50, 50, 0.95) 0%, rgba(20, 35, 35, 0.98) 100%)',
@@ -252,8 +261,8 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
                     return (
                       <motion.button
                         key={rank}
-                        whileHover={{ scale: 1.1, y: -2 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={shouldReduce ? undefined : { scale: 1.1, y: -2 }}
+                        whileTap={shouldReduce ? undefined : { scale: 0.95 }}
                         onClick={() => handleRankSelect(rank)}
                         disabled={isPending}
                         className={`

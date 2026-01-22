@@ -9,6 +9,7 @@ jest.mock('motion/react', () => ({
       </div>
     ),
   },
+  useReducedMotion: () => false,
 }));
 
 describe('PageWrapper', () => {

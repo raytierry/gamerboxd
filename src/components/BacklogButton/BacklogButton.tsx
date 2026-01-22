@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence, useDragControls, PanInfo } from 'motion/react';
+import { motion, AnimatePresence, useDragControls, useReducedMotion, PanInfo } from 'motion/react';
 import { Plus, Check, ChevronDown, Clock, Gamepad2, Trophy, X, Pause, Loader2 } from 'lucide-react';
 import { BacklogStatus } from '@prisma/client';
 import { useBacklogStatus, useAddToBacklog, useRemoveFromBacklog, useUpdateBacklogStatus } from '@/hooks/use-backlog';
@@ -29,6 +29,7 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const dragControls = useDragControls();
+  const shouldReduce = useReducedMotion();
   
   const { data: backlogEntry, isLoading } = useBacklogStatus(game.id);
   const addMutation = useAddToBacklog();
@@ -67,6 +68,14 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
     }
   };
 
+  const springTransition = shouldReduce 
+    ? { duration: 0.01 } 
+    : { type: 'spring', damping: 25, stiffness: 300 };
+
+  const fadeTransition = shouldReduce 
+    ? { duration: 0.01 } 
+    : { duration: 0.15 };
+
   if (isLoading) {
     return (
       <div className="h-11 w-44 rounded-full animate-pulse border border-white/10" style={{
@@ -100,10 +109,10 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
         <span className="relative w-5 h-5 flex items-center justify-center">
           <motion.span
             key={isPending ? 'loading' : 'icon'}
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={shouldReduce ? false : { opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.15 }}
+            exit={shouldReduce ? undefined : { opacity: 0, scale: 0.8 }}
+            transition={fadeTransition}
             className="absolute inset-0 flex items-center justify-center"
           >
             {isPending ? (
@@ -126,11 +135,11 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
             />
 
             <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              drag="y"
+              initial={shouldReduce ? { opacity: 0 } : { y: '100%' }}
+              animate={shouldReduce ? { opacity: 1 } : { y: 0 }}
+              exit={shouldReduce ? { opacity: 0 } : { y: '100%' }}
+              transition={springTransition}
+              drag={shouldReduce ? false : 'y'}
               dragControls={dragControls}
               dragListener={false}
               dragConstraints={{ top: 0, bottom: 0 }}
@@ -202,10 +211,10 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 8, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 8, scale: 0.96 }}
-              transition={{ duration: 0.15 }}
+              initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.96 }}
+              animate={shouldReduce ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+              exit={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.96 }}
+              transition={fadeTransition}
               className="hidden sm:block absolute top-full left-0 mt-2 w-56 rounded-2xl shadow-xl overflow-hidden z-50 border border-white/10"
               style={{
                 background: 'linear-gradient(145deg, rgba(30, 50, 50, 0.95) 0%, rgba(20, 35, 35, 0.98) 100%)',

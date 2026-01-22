@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { X, AlertTriangle, Trophy, ArrowRight, Trash2 } from 'lucide-react';
-import { motion, AnimatePresence, useDragControls, PanInfo } from 'motion/react';
+import { motion, AnimatePresence, useDragControls, useReducedMotion, PanInfo } from 'motion/react';
 import type { ConflictingGame, ConflictResolution } from '@/hooks/use-favorites';
 
 interface FavoriteConflictModalProps {
@@ -44,6 +44,19 @@ export function FavoriteConflictModal({
 }: FavoriteConflictModalProps) {
   const [showReassignPicker, setShowReassignPicker] = useState(false);
   const dragControls = useDragControls();
+  const shouldReduce = useReducedMotion();
+
+  const springTransition = shouldReduce 
+    ? { duration: 0.01 } 
+    : { type: 'spring', damping: 25, stiffness: 300 };
+
+  const fadeTransition = shouldReduce 
+    ? { duration: 0.01 } 
+    : { duration: 0.2 };
+
+  const slideTransition = shouldReduce 
+    ? { duration: 0.01 } 
+    : { duration: 0.15 };
 
   const handleReplace = () => {
     onResolve({ type: 'replace' });
@@ -78,16 +91,17 @@ export function FavoriteConflictModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={fadeTransition}
             className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
             onClick={onClose}
           />
 
           <motion.div
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            drag="y"
+            initial={shouldReduce ? { opacity: 0 } : { y: '100%' }}
+            animate={shouldReduce ? { opacity: 1 } : { y: 0 }}
+            exit={shouldReduce ? { opacity: 0 } : { y: '100%' }}
+            transition={springTransition}
+            drag={shouldReduce ? false : 'y'}
             dragControls={dragControls}
             dragListener={false}
             dragConstraints={{ top: 0, bottom: 0 }}
@@ -109,9 +123,10 @@ export function FavoriteConflictModal({
                 {!showReassignPicker ? (
                   <motion.div
                     key="main"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
+                    initial={shouldReduce ? { opacity: 0 } : { opacity: 0, x: -20 }}
+                    animate={shouldReduce ? { opacity: 1 } : { opacity: 1, x: 0 }}
+                    exit={shouldReduce ? { opacity: 0 } : { opacity: 0, x: -20 }}
+                    transition={slideTransition}
                   >
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2 text-amber-400">
@@ -189,9 +204,10 @@ export function FavoriteConflictModal({
                 ) : (
                   <motion.div
                     key="reassign"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
+                    initial={shouldReduce ? { opacity: 0 } : { opacity: 0, x: 20 }}
+                    animate={shouldReduce ? { opacity: 1 } : { opacity: 1, x: 0 }}
+                    exit={shouldReduce ? { opacity: 0 } : { opacity: 0, x: 20 }}
+                    transition={slideTransition}
                   >
                     <div className="flex items-center justify-between mb-4">
                       <button
@@ -223,7 +239,7 @@ export function FavoriteConflictModal({
                         return (
                           <motion.button
                             key={rank}
-                            whileTap={isAvailable ? { scale: 0.95 } : undefined}
+                            whileTap={shouldReduce || !isAvailable ? undefined : { scale: 0.95 }}
                             onClick={() => isAvailable && handleReassign(rank)}
                             disabled={!isAvailable || isPending}
                             className={`
@@ -252,10 +268,10 @@ export function FavoriteConflictModal({
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.2 }}
+            initial={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 20 }}
+            animate={shouldReduce ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+            exit={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 20 }}
+            transition={fadeTransition}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md hidden sm:block rounded-2xl border border-white/10 overflow-hidden"
             style={{
               background: 'linear-gradient(145deg, rgba(30, 50, 50, 0.98) 0%, rgba(20, 35, 35, 0.99) 100%)',
@@ -267,9 +283,10 @@ export function FavoriteConflictModal({
                 {!showReassignPicker ? (
                   <motion.div
                     key="main"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
+                    initial={shouldReduce ? { opacity: 0 } : { opacity: 0, x: -20 }}
+                    animate={shouldReduce ? { opacity: 1 } : { opacity: 1, x: 0 }}
+                    exit={shouldReduce ? { opacity: 0 } : { opacity: 0, x: -20 }}
+                    transition={slideTransition}
                   >
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2 text-amber-400">
@@ -347,9 +364,10 @@ export function FavoriteConflictModal({
                 ) : (
                   <motion.div
                     key="reassign"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
+                    initial={shouldReduce ? { opacity: 0 } : { opacity: 0, x: 20 }}
+                    animate={shouldReduce ? { opacity: 1 } : { opacity: 1, x: 0 }}
+                    exit={shouldReduce ? { opacity: 0 } : { opacity: 0, x: 20 }}
+                    transition={slideTransition}
                   >
                     <div className="flex items-center justify-between mb-4">
                       <button
@@ -381,8 +399,8 @@ export function FavoriteConflictModal({
                         return (
                           <motion.button
                             key={rank}
-                            whileHover={isAvailable ? { scale: 1.1, y: -2 } : undefined}
-                            whileTap={isAvailable ? { scale: 0.95 } : undefined}
+                            whileHover={shouldReduce || !isAvailable ? undefined : { scale: 1.1, y: -2 }}
+                            whileTap={shouldReduce || !isAvailable ? undefined : { scale: 0.95 }}
                             onClick={() => isAvailable && handleReassign(rank)}
                             disabled={!isAvailable || isPending}
                             className={`

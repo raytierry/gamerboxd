@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Home, Search, User } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -16,6 +16,7 @@ const navItems = [
 export default function BottomNav() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const shouldReduce = useReducedMotion();
 
   const isActive = (path: string) => {
     if (path === '/') {
@@ -52,13 +53,12 @@ export default function BottomNav() {
             >
               {active && (
                 <motion.div
-                  layoutId="bottomNavIndicator"
+                  layoutId={shouldReduce ? undefined : 'bottomNavIndicator'}
                   className="absolute inset-0 bg-white rounded-full"
-                  transition={{
-                    type: 'spring',
-                    stiffness: 500,
-                    damping: 35,
-                  }}
+                  transition={shouldReduce 
+                    ? { duration: 0 }
+                    : { type: 'spring', stiffness: 500, damping: 35 }
+                  }
                 />
               )}
               <Icon className="w-5 h-5 relative z-10" />

@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { ReactNode } from 'react';
 
 interface PageWrapperProps {
@@ -9,14 +9,16 @@ interface PageWrapperProps {
 }
 
 export default function PageWrapper({ children, className = '' }: PageWrapperProps) {
+  const shouldReduce = useReducedMotion();
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ 
-        duration: 0.4, 
-        ease: [0.25, 0.1, 0.25, 1]
-      }}
+      initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 12 }}
+      animate={shouldReduce ? { opacity: 1 } : { opacity: 1, y: 0 }}
+      transition={shouldReduce 
+        ? { duration: 0.01 } 
+        : { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+      }
       className={className}
     >
       {children}

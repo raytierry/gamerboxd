@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { Search, X, Gamepad2 } from 'lucide-react';
 import { useSearchGames } from '@/hooks/use-games';
 import { useSearch } from '@/contexts/SearchContext';
@@ -17,6 +17,7 @@ export default function SearchPage() {
   const { query, setQuery } = useSearch();
   const debouncedQuery = useDebounce(query, 300);
   const inputRef = useRef<HTMLInputElement>(null);
+  const shouldReduce = useReducedMotion();
 
   const {
     data: searchResults,
@@ -31,6 +32,14 @@ export default function SearchPage() {
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  const fadeTransition = shouldReduce 
+    ? { duration: 0.01 } 
+    : { duration: 0.2 };
+
+  const slideTransition = shouldReduce 
+    ? { duration: 0.01 } 
+    : { duration: 0.3 };
 
   return (
     <PageWrapper className="min-h-screen pb-28 lg:pb-10">
@@ -65,9 +74,10 @@ export default function SearchPage() {
             <AnimatePresence>
               {query && (
                 <motion.button
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
+                  initial={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
+                  animate={shouldReduce ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+                  exit={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
+                  transition={fadeTransition}
                   onClick={() => setQuery('')}
                   className="p-1.5 rounded-full bg-white/10 text-white/60 hover:text-white hover:bg-white/20 transition-colors"
                 >
@@ -85,10 +95,10 @@ export default function SearchPage() {
           {!query ? (
             <motion.div
               key="empty"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
+              initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 20 }}
+              animate={shouldReduce ? { opacity: 1 } : { opacity: 1, y: 0 }}
+              exit={shouldReduce ? { opacity: 0 } : { opacity: 0, y: -20 }}
+              transition={slideTransition}
               className="text-center py-16"
             >
               <div 
@@ -108,16 +118,16 @@ export default function SearchPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={fadeTransition}
             >
               <p className="text-sm text-white/50 mb-6">Searching for &quot;{query}&quot;...</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                 {Array.from({ length: 12 }).map((_, i) => (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, scale: 0.9 }}
+                    initial={shouldReduce ? false : { opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.03 }}
+                    transition={shouldReduce ? { duration: 0 } : { delay: i * 0.03 }}
                   >
                     <Skeleton className="aspect-[3/4] rounded-xl" />
                     <Skeleton className="h-4 w-3/4 mt-3" />
@@ -129,10 +139,10 @@ export default function SearchPage() {
           ) : searchGames.length === 0 && debouncedQuery ? (
             <motion.div
               key="no-results"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
+              initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 20 }}
+              animate={shouldReduce ? { opacity: 1 } : { opacity: 1, y: 0 }}
+              exit={shouldReduce ? { opacity: 0 } : { opacity: 0, y: -20 }}
+              transition={slideTransition}
               className="text-center py-16"
             >
               <div 
@@ -152,7 +162,7 @@ export default function SearchPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={fadeTransition}
             >
               <div className="flex items-center justify-between mb-6">
                 <p className="text-sm text-white/50">
@@ -164,9 +174,9 @@ export default function SearchPage() {
                 {searchGames.map((game, i) => (
                   <motion.div
                     key={game.id}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={shouldReduce ? false : { opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.02, duration: 0.3 }}
+                    transition={shouldReduce ? { duration: 0 } : { delay: i * 0.02, duration: 0.3 }}
                   >
                     <SearchResultCard game={game} />
                   </motion.div>
