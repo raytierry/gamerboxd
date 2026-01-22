@@ -107,11 +107,7 @@ export function FavoriteConflictModal({
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 0.5 }}
             onDragEnd={handleDragEnd}
-            className="fixed inset-x-0 bottom-0 z-50 sm:hidden rounded-t-3xl border-t border-white/10 overflow-hidden touch-none"
-            style={{
-              background: 'linear-gradient(145deg, rgba(30, 50, 50, 0.98) 0%, rgba(20, 35, 35, 0.99) 100%)',
-              backdropFilter: 'blur(24px)',
-            }}
+            className="fixed inset-x-0 bottom-0 z-50 sm:hidden rounded-t-3xl border-t border-white/10 overflow-hidden touch-none glass-modal"
           >
             <div className="p-4 pb-8">
               <div 
@@ -272,11 +268,7 @@ export function FavoriteConflictModal({
             animate={shouldReduce ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
             exit={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 20 }}
             transition={fadeTransition}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md hidden sm:block rounded-2xl border border-white/10 overflow-hidden"
-            style={{
-              background: 'linear-gradient(145deg, rgba(30, 50, 50, 0.98) 0%, rgba(20, 35, 35, 0.99) 100%)',
-              backdropFilter: 'blur(24px)',
-            }}
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md hidden sm:block rounded-2xl border border-white/10 overflow-hidden glass-modal"
           >
             <div className="p-6">
               <AnimatePresence mode="wait">

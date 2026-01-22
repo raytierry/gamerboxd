@@ -60,6 +60,18 @@ export function usePopularGames(pageSize = 12) {
   });
 }
 
+export function useHighlightGames(pageSize = 10) {
+  return useQuery({
+    queryKey: ['games', 'highlight', pageSize],
+    queryFn: () => fetchGames({ 
+      page: 1, 
+      pageSize, 
+      ordering: '-metacritic',
+      metacritic: '85,100',
+    }),
+  });
+}
+
 export function useTrendingGames(pageSize = 12) {
   return useQuery({
     queryKey: ['games', 'trending', pageSize],

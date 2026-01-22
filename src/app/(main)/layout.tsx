@@ -25,7 +25,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     <SearchProvider>
       <div className="min-h-screen flex flex-col">
         <TopNav />
-        <main className="flex-1 pb-28 pt-4 lg:pb-0 lg:pt-28">
+        <main className="flex-1 pb-28 lg:pb-0">
           {children}
         </main>
         <Footer />

@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -13,28 +14,43 @@ const navItems = [
   { href: '/profile', icon: User, label: 'Profile', requiresAuth: true },
 ];
 
+function getActiveTab(pathname: string): string {
+  if (pathname === '/' || pathname.startsWith('/games/')) {
+    return '/';
+  }
+  if (pathname.startsWith('/search')) {
+    return '/search';
+  }
+  if (pathname.startsWith('/profile')) {
+    return '/profile';
+  }
+  return '/';
+}
+
 export default function BottomNav() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const shouldReduce = useReducedMotion();
+  
+  const activeTab = getActiveTab(pathname);
+  const prevActiveTabRef = useRef(activeTab);
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+  
+  useEffect(() => {
+    const tabChanged = prevActiveTabRef.current !== activeTab;
+    setShouldAnimate(tabChanged);
+    prevActiveTabRef.current = activeTab;
+  }, [activeTab]);
 
-  const isActive = (path: string) => {
-    if (path === '/') {
-      return pathname === '/' || pathname.startsWith('/games/');
-    }
-    return pathname.startsWith(path);
-  };
+  const isActive = (path: string) => path === activeTab;
 
   return (
     <nav className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 lg:hidden">
       <div
-        className="flex items-center p-1.5 rounded-full border border-white/[0.1]"
+        className="flex items-center p-1.5 rounded-full border border-white/[0.1] glass-nav"
         style={{
-          background:
-            'linear-gradient(145deg, rgba(45, 80, 75, 0.5) 0%, rgba(25, 45, 45, 0.7) 100%)',
-          backdropFilter: 'blur(24px)',
           boxShadow:
-            '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+            '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
         }}
       >
         {navItems.map((item) => {
@@ -55,7 +71,8 @@ export default function BottomNav() {
                 <motion.div
                   layoutId={shouldReduce ? undefined : 'bottomNavIndicator'}
                   className="absolute inset-0 bg-white rounded-full"
-                  transition={shouldReduce 
+                  initial={false}
+                  transition={shouldReduce || !shouldAnimate
                     ? { duration: 0 }
                     : { type: 'spring', stiffness: 500, damping: 35 }
                   }

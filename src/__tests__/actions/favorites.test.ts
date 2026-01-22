@@ -77,7 +77,7 @@ describe('Favorites Actions', () => {
 
   describe('checkRankConflict', () => {
     it('should return no conflict when not authenticated', async () => {
-      mockAuth.mockResolvedValueOnce(null);
+      mockAuth.mockResolvedValueOnce(null as never);
 
       const result = await checkRankConflict(1);
 
@@ -102,7 +102,7 @@ describe('Favorites Actions', () => {
 
     it('should return no conflict when rank is free', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.favoriteGame.findUnique as jest.Mock).mockResolvedValueOnce(null);
+      (mockPrisma.favoriteGame.findUnique as jest.Mock).mockResolvedValueOnce(null as never);
 
       const result = await checkRankConflict(1);
 
@@ -143,7 +143,7 @@ describe('Favorites Actions', () => {
 
   describe('getUsedRanks', () => {
     it('should return empty array when not authenticated', async () => {
-      mockAuth.mockResolvedValueOnce(null);
+      mockAuth.mockResolvedValueOnce(null as never);
 
       const result = await getUsedRanks();
 
@@ -179,7 +179,7 @@ describe('Favorites Actions', () => {
 
   describe('addToFavorites', () => {
     it('should return error when not authenticated', async () => {
-      mockAuth.mockResolvedValueOnce(null);
+      mockAuth.mockResolvedValueOnce(null as never);
 
       const result = await addToFavorites(mockGameData, 1);
 
@@ -206,7 +206,7 @@ describe('Favorites Actions', () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
       (mockPrisma.favoriteGame.findUnique as jest.Mock)
         .mockResolvedValueOnce(mockFavoriteEntry)
-        .mockResolvedValueOnce(null);
+        .mockResolvedValueOnce(null as never);
 
       const result = await addToFavorites(mockGameData, 1);
 
@@ -219,7 +219,7 @@ describe('Favorites Actions', () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
       (mockPrisma.favoriteGame.findUnique as jest.Mock)
         .mockResolvedValueOnce(conflictingGame)
-        .mockResolvedValueOnce(null);
+        .mockResolvedValueOnce(null as never);
 
       const result = await addToFavorites(mockGameData, 1);
 
@@ -233,8 +233,8 @@ describe('Favorites Actions', () => {
     it('should create new favorite when rank is free', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
       (mockPrisma.favoriteGame.findUnique as jest.Mock)
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(null);
+        .mockResolvedValueOnce(null as never)
+        .mockResolvedValueOnce(null as never);
       (mockPrisma.favoriteGame.create as jest.Mock).mockResolvedValueOnce(mockFavoriteEntry);
 
       const result = await addToFavorites(mockGameData, 1);
@@ -251,7 +251,7 @@ describe('Favorites Actions', () => {
     it('should update existing game rank when rank is free', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
       (mockPrisma.favoriteGame.findUnique as jest.Mock)
-        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(null as never)
         .mockResolvedValueOnce(mockFavoriteEntry);
       (mockPrisma.favoriteGame.update as jest.Mock).mockResolvedValueOnce({ ...mockFavoriteEntry, rank: 5 });
 
@@ -281,7 +281,7 @@ describe('Favorites Actions', () => {
         mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
         (mockPrisma.favoriteGame.findUnique as jest.Mock)
           .mockResolvedValueOnce(conflictingGame)
-          .mockResolvedValueOnce(null);
+          .mockResolvedValueOnce(null as never);
         (mockPrisma.$transaction as jest.Mock).mockImplementation(mockTransaction);
 
         const result = await addToFavorites(mockGameData, 1, { type: 'replace' });
@@ -324,7 +324,7 @@ describe('Favorites Actions', () => {
         mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
         (mockPrisma.favoriteGame.findUnique as jest.Mock)
           .mockResolvedValueOnce(conflictingGame)
-          .mockResolvedValueOnce(null);
+          .mockResolvedValueOnce(null as never);
 
         const result = await addToFavorites(mockGameData, 1, { type: 'swap', newRankForOld: 0 });
 
@@ -337,7 +337,7 @@ describe('Favorites Actions', () => {
         mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
         (mockPrisma.favoriteGame.findUnique as jest.Mock)
           .mockResolvedValueOnce(conflictingGame)
-          .mockResolvedValueOnce(null);
+          .mockResolvedValueOnce(null as never);
 
         const result = await addToFavorites(mockGameData, 1, { type: 'swap', newRankForOld: 11 });
 
@@ -383,7 +383,7 @@ describe('Favorites Actions', () => {
         mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
         (mockPrisma.favoriteGame.findUnique as jest.Mock)
           .mockResolvedValueOnce(conflictingGame)
-          .mockResolvedValueOnce(null);
+          .mockResolvedValueOnce(null as never);
         (mockPrisma.$transaction as jest.Mock).mockImplementation(mockTransaction);
 
         const result = await addToFavorites(mockNewGameData, 1, { type: 'swap', newRankForOld: 3 });
@@ -405,7 +405,7 @@ describe('Favorites Actions', () => {
 
   describe('removeFromFavorites', () => {
     it('should return error when not authenticated', async () => {
-      mockAuth.mockResolvedValueOnce(null);
+      mockAuth.mockResolvedValueOnce(null as never);
 
       const result = await removeFromFavorites(123);
 
@@ -432,7 +432,7 @@ describe('Favorites Actions', () => {
 
   describe('getFavoriteStatus', () => {
     it('should return null when not authenticated', async () => {
-      mockAuth.mockResolvedValueOnce(null);
+      mockAuth.mockResolvedValueOnce(null as never);
 
       const result = await getFavoriteStatus(123);
 
@@ -451,7 +451,7 @@ describe('Favorites Actions', () => {
 
   describe('getUserFavorites', () => {
     it('should return empty array when not authenticated', async () => {
-      mockAuth.mockResolvedValueOnce(null);
+      mockAuth.mockResolvedValueOnce(null as never);
 
       const result = await getUserFavorites();
 

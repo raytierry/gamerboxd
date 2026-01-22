@@ -116,9 +116,7 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
 
   if (isLoading) {
     return (
-      <div className="h-11 w-40 rounded-full animate-pulse border border-white/10" style={{
-        background: 'linear-gradient(145deg, rgba(45, 80, 75, 0.2) 0%, rgba(25, 45, 45, 0.3) 100%)',
-      }} />
+      <div className="h-11 w-40 rounded-full animate-pulse border border-white/10 glass-button" />
     );
   }
 
@@ -130,13 +128,11 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
         <button
           onClick={() => setShowRankPicker(!showRankPicker)}
           disabled={isPending}
-          className="flex items-center gap-2 h-11 px-5 rounded-full font-medium transition-all duration-200 border border-white/10 min-w-[150px] text-white/80 hover:text-white hover:bg-white/10"
-          style={{
-            background: isFavorite 
-              ? 'linear-gradient(145deg, rgba(239, 68, 68, 0.2) 0%, rgba(185, 28, 28, 0.3) 100%)'
-              : 'linear-gradient(145deg, rgba(45, 80, 75, 0.2) 0%, rgba(25, 45, 45, 0.3) 100%)',
+          className={`flex items-center gap-2 h-11 px-5 rounded-full font-medium transition-all duration-200 border border-white/10 min-w-[150px] text-white/80 hover:text-white hover:bg-white/10 ${isFavorite ? '' : 'glass-button'}`}
+          style={isFavorite ? {
+            background: 'linear-gradient(180deg, rgba(239, 68, 68, 0.2) 0%, rgba(185, 28, 28, 0.3) 100%)',
             backdropFilter: 'blur(12px)',
-          }}
+          } : undefined}
         >
           <span className="relative w-4 h-4 flex items-center justify-center">
             <motion.span
@@ -161,12 +157,16 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
         <AnimatePresence>
           {showRankPicker && (
             <>
-              <div 
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={fadeTransition}
                 className="fixed inset-0 z-40 bg-black/50 sm:bg-transparent" 
                 onClick={() => setShowRankPicker(false)} 
               />
               
-              <motion.div
+                <motion.div
                 initial={shouldReduce ? { opacity: 0 } : { y: '100%' }}
                 animate={shouldReduce ? { opacity: 1 } : { y: 0 }}
                 exit={shouldReduce ? { opacity: 0 } : { y: '100%' }}
@@ -177,11 +177,7 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
                 dragConstraints={{ top: 0, bottom: 0 }}
                 dragElastic={{ top: 0, bottom: 0.5 }}
                 onDragEnd={handleDragEnd}
-                className="fixed inset-x-0 bottom-0 p-4 pb-8 rounded-t-3xl z-50 sm:hidden border-t border-white/10 touch-none"
-                style={{
-                  background: 'linear-gradient(145deg, rgba(30, 50, 50, 0.98) 0%, rgba(20, 35, 35, 0.99) 100%)',
-                  backdropFilter: 'blur(24px)',
-                }}
+                className="fixed inset-x-0 bottom-0 p-4 pb-8 rounded-t-3xl z-50 sm:hidden border-t border-white/10 touch-none glass-modal"
               >
                 <div 
                   className="w-12 h-1 bg-white/30 rounded-full mx-auto mb-4 cursor-grab active:cursor-grabbing"
@@ -243,11 +239,7 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
                 animate={shouldReduce ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
                 exit={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.96 }}
                 transition={fadeTransition}
-                className="hidden sm:block absolute top-full left-0 mt-2 p-3 rounded-2xl shadow-xl z-50 border border-white/10"
-                style={{
-                  background: 'linear-gradient(145deg, rgba(30, 50, 50, 0.95) 0%, rgba(20, 35, 35, 0.98) 100%)',
-                  backdropFilter: 'blur(24px)',
-                }}
+                className="hidden sm:block absolute top-full left-0 mt-2 p-3 rounded-2xl shadow-xl z-50 border border-white/10 glass-modal"
               >
                 <div className="flex items-center gap-2 mb-3 px-1">
                   <Trophy className="h-4 w-4 text-amber-400" />

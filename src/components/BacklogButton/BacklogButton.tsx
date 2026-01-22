@@ -78,9 +78,7 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
 
   if (isLoading) {
     return (
-      <div className="h-11 w-44 rounded-full animate-pulse border border-white/10" style={{
-        background: 'linear-gradient(145deg, rgba(45, 80, 75, 0.2) 0%, rgba(25, 45, 45, 0.3) 100%)',
-      }} />
+      <div className="h-11 w-44 rounded-full animate-pulse border border-white/10 glass-button" />
     );
   }
 
@@ -97,14 +95,10 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
         className={`
           flex items-center gap-2 h-11 px-5 rounded-full font-medium transition-all duration-200 min-w-[180px] border border-white/10
           ${currentStatus 
-            ? config?.color
+            ? `${config?.color} glass-button`
             : 'bg-white text-black hover:bg-white/90'
           }
         `}
-        style={currentStatus ? {
-          background: 'linear-gradient(145deg, rgba(45, 80, 75, 0.3) 0%, rgba(25, 45, 45, 0.4) 100%)',
-          backdropFilter: 'blur(12px)',
-        } : undefined}
       >
         <span className="relative w-5 h-5 flex items-center justify-center">
           <motion.span
@@ -129,7 +123,11 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
       <AnimatePresence>
         {isOpen && (
           <>
-            <div 
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={fadeTransition}
               className="fixed inset-0 z-40 bg-black/50 sm:bg-transparent" 
               onClick={() => setIsOpen(false)} 
             />
@@ -145,11 +143,7 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
               dragConstraints={{ top: 0, bottom: 0 }}
               dragElastic={{ top: 0, bottom: 0.5 }}
               onDragEnd={handleDragEnd}
-              className="fixed inset-x-0 bottom-0 p-4 pb-8 rounded-t-3xl z-50 sm:hidden border-t border-white/10 touch-none"
-              style={{
-                background: 'linear-gradient(145deg, rgba(30, 50, 50, 0.98) 0%, rgba(20, 35, 35, 0.99) 100%)',
-                backdropFilter: 'blur(24px)',
-              }}
+              className="fixed inset-x-0 bottom-0 p-4 pb-8 rounded-t-3xl z-50 sm:hidden border-t border-white/10 touch-none glass-modal"
             >
               <div 
                 className="w-12 h-1 bg-white/30 rounded-full mx-auto mb-4 cursor-grab active:cursor-grabbing"
@@ -215,11 +209,7 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
               animate={shouldReduce ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
               exit={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.96 }}
               transition={fadeTransition}
-              className="hidden sm:block absolute top-full left-0 mt-2 w-56 rounded-2xl shadow-xl overflow-hidden z-50 border border-white/10"
-              style={{
-                background: 'linear-gradient(145deg, rgba(30, 50, 50, 0.95) 0%, rgba(20, 35, 35, 0.98) 100%)',
-                backdropFilter: 'blur(24px)',
-              }}
+              className="hidden sm:block absolute top-full left-0 mt-2 w-56 rounded-2xl shadow-xl overflow-hidden z-50 border border-white/10 glass-modal"
             >
               <div className="p-1.5">
                 {(Object.keys(STATUS_CONFIG) as BacklogStatus[]).map((status) => {

@@ -58,7 +58,7 @@ describe('Backlog Actions', () => {
 
   describe('addToBacklog', () => {
     it('should return error when not authenticated', async () => {
-      mockAuth.mockResolvedValueOnce(null);
+      mockAuth.mockResolvedValueOnce(null as never);
 
       const result = await addToBacklog(mockGameData);
 
@@ -67,7 +67,7 @@ describe('Backlog Actions', () => {
 
     it('should create new backlog entry when not exists', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.backlogGame.findUnique as jest.Mock).mockResolvedValueOnce(null);
+      (mockPrisma.backlogGame.findUnique as jest.Mock).mockResolvedValueOnce(null as never);
       (mockPrisma.backlogGame.create as jest.Mock).mockResolvedValueOnce(mockBacklogEntry);
 
       const result = await addToBacklog(mockGameData);
@@ -111,7 +111,7 @@ describe('Backlog Actions', () => {
 
   describe('removeFromBacklog', () => {
     it('should return error when not authenticated', async () => {
-      mockAuth.mockResolvedValueOnce(null);
+      mockAuth.mockResolvedValueOnce(null as never);
 
       const result = await removeFromBacklog(123);
 
@@ -147,7 +147,7 @@ describe('Backlog Actions', () => {
 
   describe('updateBacklogStatus', () => {
     it('should return error when not authenticated', async () => {
-      mockAuth.mockResolvedValueOnce(null);
+      mockAuth.mockResolvedValueOnce(null as never);
 
       const result = await updateBacklogStatus(123, 'PLAYING');
 
@@ -178,7 +178,7 @@ describe('Backlog Actions', () => {
 
   describe('getBacklogStatus', () => {
     it('should return null when not authenticated', async () => {
-      mockAuth.mockResolvedValueOnce(null);
+      mockAuth.mockResolvedValueOnce(null as never);
 
       const result = await getBacklogStatus(123);
 
@@ -206,7 +206,7 @@ describe('Backlog Actions', () => {
 
   describe('getUserBacklog', () => {
     it('should return empty array when not authenticated', async () => {
-      mockAuth.mockResolvedValueOnce(null);
+      mockAuth.mockResolvedValueOnce(null as never);
 
       const result = await getUserBacklog();
 

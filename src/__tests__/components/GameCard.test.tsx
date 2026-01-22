@@ -27,10 +27,10 @@ const mockGame: RAWGGame = {
   released: '2015-05-19',
   genres: [{ id: 1, name: 'RPG', slug: 'rpg' }],
   platforms: [],
-  parent_platforms: [],
   stores: [],
+  short_screenshots: [],
   rating: 4.5,
-  ratings_count: 1000,
+  playtime: 50,
 };
 
 describe('GameCard', () => {

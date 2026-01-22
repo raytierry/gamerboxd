@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
-import { Search, X, Gamepad2 } from 'lucide-react';
+import { Search, X, Gamepad2, Star, Loader2 } from 'lucide-react';
 import { useSearchGames } from '@/hooks/use-games';
 import { useSearch } from '@/contexts/SearchContext';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -128,10 +128,13 @@ export default function SearchPage() {
                     initial={shouldReduce ? false : { opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={shouldReduce ? { duration: 0 } : { delay: i * 0.03 }}
+                    className="rounded-xl overflow-hidden bg-white/5"
                   >
-                    <Skeleton className="aspect-[3/4] rounded-xl" />
-                    <Skeleton className="h-4 w-3/4 mt-3" />
-                    <Skeleton className="h-3 w-1/2 mt-2" />
+                    <Skeleton className="aspect-[4/3] rounded-none" />
+                    <div className="p-3">
+                      <Skeleton className="h-4 w-full mb-1.5" />
+                      <Skeleton className="h-3 w-2/3" />
+                    </div>
                   </motion.div>
                 ))}
               </div>
@@ -204,37 +207,112 @@ export default function SearchPage() {
 }
 
 function SearchResultCard({ game }: { game: RAWGGame }) {
+  const releaseYear = game.released ? new Date(game.released).getFullYear() : null;
+  const shouldReduce = useReducedMotion();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleClick = () => {
+    setIsLoading(true);
+  };
+
   return (
-    <Link href={`/games/${game.slug}`} className="block group">
-      <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-card">
-        {game.background_image ? (
-          <Image
-            src={game.background_image}
-            alt={game.name}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-secondary">
-            <span className="text-3xl opacity-20">🎮</span>
-          </div>
+    <Link href={`/games/${game.slug}`} className="block" onClick={handleClick}>
+      <motion.div
+        className="group relative rounded-xl overflow-hidden glass-card"
+        initial={false}
+        whileHover={shouldReduce ? undefined : { 
+          y: -6,
+          transition: { type: 'spring', stiffness: 400, damping: 20 }
+        }}
+      >
+        {/* Loading overlay */}
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 z-30 bg-black/60 backdrop-blur-sm flex items-center justify-center"
+          >
+            <Loader2 className="w-6 h-6 text-white animate-spin" />
+          </motion.div>
         )}
 
-        {game.metacritic && (
-          <div className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-sm text-xs font-bold text-white">
-            {game.metacritic}
+        {/* Shine effect overlay */}
+        <motion.div
+          className="absolute inset-0 z-10 pointer-events-none"
+          initial={{ x: '-100%', opacity: 0 }}
+          whileHover={shouldReduce ? undefined : { 
+            x: '100%', 
+            opacity: 1,
+            transition: { duration: 0.5, ease: 'easeInOut' }
+          }}
+          style={{
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
+          }}
+        />
+
+        <div className="relative aspect-[4/3] overflow-hidden">
+          {game.background_image ? (
+            <Image
+              src={game.background_image}
+              alt={game.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-white/5">
+              <span className="text-3xl opacity-20">🎮</span>
+            </div>
+          )}
+
+          {game.metacritic && (
+            <motion.div 
+              className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-bold text-white z-20"
+              style={{
+                background: game.metacritic >= 75 
+                  ? 'rgba(34, 197, 94, 0.9)' 
+                  : game.metacritic >= 50 
+                    ? 'rgba(234, 179, 8, 0.9)' 
+                    : 'rgba(239, 68, 68, 0.9)',
+              }}
+              whileHover={shouldReduce ? undefined : { scale: 1.1 }}
+            >
+              {game.metacritic}
+            </motion.div>
+          )}
+        </div>
+
+        <div className="p-3">
+          <h3 className="font-medium text-white text-sm leading-tight line-clamp-2 mb-1.5">
+            {game.name}
+          </h3>
+
+          <div className="flex items-center gap-2">
+            {game.genres?.[0] && (
+              <span className="text-[10px] text-white/50">
+                {game.genres[0].name}
+              </span>
+            )}
+            {releaseYear && (
+              <>
+                <span className="text-white/20">·</span>
+                <span className="text-[10px] text-white/40">{releaseYear}</span>
+              </>
+            )}
+            {game.rating > 0 && (
+              <>
+                <span className="text-white/20">·</span>
+                <div className="flex items-center gap-0.5">
+                  <Star className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />
+                  <span className="text-[10px] text-white/50">
+                    {game.rating.toFixed(1)}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
-        )}
-      </div>
-      <div className="mt-2">
-        <p className="font-medium text-sm text-foreground line-clamp-2 group-hover:text-white/80 transition-colors">
-          {game.name}
-        </p>
-        {game.genres?.[0] && (
-          <p className="text-xs text-muted-foreground mt-0.5">{game.genres[0].name}</p>
-        )}
-      </div>
+        </div>
+      </motion.div>
     </Link>
   );
 }

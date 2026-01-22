@@ -44,17 +44,14 @@ export default async function GamePage({ params }: PageProps) {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/20" />
 
-        <div className="absolute top-6 left-6 lg:top-28 lg:left-10">
+        <div className="absolute top-6 left-6">
           <Link 
             href="/"
-            className="flex items-center gap-2 px-4 py-2 rounded-full text-sm text-white/80 hover:text-white border border-white/10 transition-all hover:bg-white/10"
-            style={{
-              background: 'linear-gradient(145deg, rgba(45, 80, 75, 0.4) 0%, rgba(25, 45, 45, 0.6) 100%)',
-              backdropFilter: 'blur(12px)',
-            }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium text-white bg-black/50 hover:bg-black/70 border border-white/20 transition-all backdrop-blur-md"
+            aria-label="Go back to home page"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Back
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back to Home</span>
           </Link>
         </div>
       </div>
