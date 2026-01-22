@@ -1,4 +1,5 @@
 services:
+  # PostgreSQL Database
   postgres:
     image: postgres:16-alpine
     container_name: gamerboxd-db
@@ -10,6 +11,57 @@ services:
       POSTGRES_DB: gamerboxd
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gamerboxd -d gamerboxd"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Next.js Application (Development)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: gamerboxd-app
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://gamerboxd:gamerboxd123@postgres:5432/gamerboxd
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-your-secret-key-change-in-production}
+      - AUTH_SECRET=${AUTH_SECRET:-your-secret-key-change-in-production}
+      - RAWG_API_KEY=${RAWG_API_KEY}
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - dev
+
+  # Next.js Application (Production)
+  app-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: gamerboxd-app-prod
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://gamerboxd:gamerboxd123@postgres:5432/gamerboxd
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - AUTH_SECRET=${AUTH_SECRET}
+      - RAWG_API_KEY=${RAWG_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - prod
 
 volumes:
   postgres_data:
