@@ -30,8 +30,12 @@ export default function TopNav() {
     }
   };
 
-  const isActive = (path: string) =>
-    path === '/' ? pathname === '/' : pathname.startsWith(path);
+  const isActive = (path: string) => {
+    if (path === '/') {
+      return pathname === '/' || pathname.startsWith('/games/');
+    }
+    return pathname.startsWith(path);
+  };
 
   return (
     <header className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-3rem)] max-w-4xl hidden lg:block">

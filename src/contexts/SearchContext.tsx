@@ -6,12 +6,15 @@ interface SearchContextType {
   query: string;
   setQuery: (query: string) => void;
   isSearching: boolean;
+  isMobileSearchOpen: boolean;
+  setMobileSearchOpen: (open: boolean) => void;
 }
 
 const SearchContext = createContext<SearchContextType | undefined>(undefined);
 
 export function SearchProvider({ children }: { children: ReactNode }) {
   const [query, setQuery] = useState('');
+  const [isMobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   return (
     <SearchContext.Provider
@@ -19,6 +22,8 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         query,
         setQuery,
         isSearching: query.length > 0,
+        isMobileSearchOpen,
+        setMobileSearchOpen,
       }}
     >
       {children}

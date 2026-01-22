@@ -1,5 +1,6 @@
 import TopNav from '@/components/TopNav';
 import BottomNav from '@/components/BottomNav';
+import MobileSearchOverlay from '@/components/MobileSearchOverlay';
 import { SearchProvider } from '@/contexts/SearchContext';
 
 function Footer() {
@@ -30,6 +31,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </main>
         <Footer />
         <BottomNav />
+        <MobileSearchOverlay />
       </div>
     </SearchProvider>
   );
