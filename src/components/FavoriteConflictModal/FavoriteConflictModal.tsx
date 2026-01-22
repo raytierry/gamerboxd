@@ -48,7 +48,7 @@ export function FavoriteConflictModal({
 
   const springTransition = shouldReduce 
     ? { duration: 0.01 } 
-    : { type: 'spring', damping: 25, stiffness: 300 };
+    : { type: 'spring' as const, damping: 25, stiffness: 300 };
 
   const fadeTransition = shouldReduce 
     ? { duration: 0.01 } 

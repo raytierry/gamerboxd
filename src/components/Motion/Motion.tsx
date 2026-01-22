@@ -60,7 +60,7 @@ function getTransition(shouldReduce: boolean | null, delay: number) {
   if (shouldReduce) {
     return { duration: 0.01, delay: 0 };
   }
-  return { duration: 0.4, delay, ease: 'easeOut' };
+  return { duration: 0.4, delay, ease: 'easeOut' as const };
 }
 
 export function FadeIn({ children, delay = 0, ...props }: MotionDivProps) {
