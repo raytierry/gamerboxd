@@ -1,13 +1,13 @@
+import { Skeleton } from '@/components/ui/skeleton';
+
 export default function GameGridSkeleton() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-      {Array.from({ length: 10 }).map((_, i) => (
-        <div key={i} className="animate-pulse">
-          <div className="aspect-[3/4] rounded-lg bg-[#1a1a1d]" />
-          <div className="mt-2 space-y-2">
-            <div className="h-4 bg-[#1a1a1d] rounded w-3/4" />
-            <div className="h-3 bg-[#1a1a1d] rounded w-1/2" />
-          </div>
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {Array.from({ length: 12 }).map((_, i) => (
+        <div key={i}>
+          <Skeleton className="aspect-video rounded-xl" />
+          <Skeleton className="h-4 w-3/4 mt-2" />
+          <Skeleton className="h-3 w-1/2 mt-1" />
         </div>
       ))}
     </div>

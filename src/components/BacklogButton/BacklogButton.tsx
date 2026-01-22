@@ -18,11 +18,11 @@ interface BacklogButtonProps {
 }
 
 const STATUS_CONFIG = {
-  WANT_TO_PLAY: { label: 'Want to Play', icon: Clock, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-  PLAYING: { label: 'Playing', icon: Gamepad2, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
-  COMPLETED: { label: 'Completed', icon: Trophy, color: 'text-green-400', bg: 'bg-green-500/10' },
-  DROPPED: { label: 'Dropped', icon: X, color: 'text-red-400', bg: 'bg-red-500/10' },
-  ON_HOLD: { label: 'On Hold', icon: Pause, color: 'text-purple-400', bg: 'bg-purple-500/10' },
+  WANT_TO_PLAY: { label: 'Want to Play', icon: Clock, color: 'text-blue-400' },
+  PLAYING: { label: 'Playing', icon: Gamepad2, color: 'text-emerald-400' },
+  COMPLETED: { label: 'Completed', icon: Trophy, color: 'text-green-400' },
+  DROPPED: { label: 'Dropped', icon: X, color: 'text-red-400' },
+  ON_HOLD: { label: 'On Hold', icon: Pause, color: 'text-amber-400' },
 } as const;
 
 export default function BacklogButton({ game, isAuthenticated }: BacklogButtonProps) {
@@ -62,7 +62,9 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
 
   if (isLoading) {
     return (
-      <div className="h-12 w-40 bg-white/5 rounded-xl animate-pulse" />
+      <div className="h-11 w-44 rounded-full animate-pulse border border-white/10" style={{
+        background: 'linear-gradient(145deg, rgba(45, 80, 75, 0.2) 0%, rgba(25, 45, 45, 0.3) 100%)',
+      }} />
     );
   }
 
@@ -77,12 +79,16 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
         onClick={() => setIsOpen(!isOpen)}
         disabled={isPending}
         className={`
-          flex items-center gap-2 h-12 px-5 rounded-xl font-medium transition-all duration-200 min-w-[180px]
+          flex items-center gap-2 h-11 px-5 rounded-full font-medium transition-all duration-200 min-w-[180px] border border-white/10
           ${currentStatus 
-            ? `${config?.bg} ${config?.color} border border-current/20` 
-            : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+            ? config?.color
+            : 'bg-white text-black hover:bg-white/90'
           }
         `}
+        style={currentStatus ? {
+          background: 'linear-gradient(145deg, rgba(45, 80, 75, 0.3) 0%, rgba(25, 45, 45, 0.4) 100%)',
+          backdropFilter: 'blur(12px)',
+        } : undefined}
       >
         <span className="relative w-5 h-5 flex items-center justify-center">
           <motion.span
@@ -94,13 +100,13 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
             className="absolute inset-0 flex items-center justify-center"
           >
             {isPending ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <IconComponent className="w-5 h-5" />
+              <IconComponent className="w-4 h-4" />
             )}
           </motion.span>
         </span>
-        <span className="flex-1 text-left">{buttonText}</span>
+        <span className="flex-1 text-left text-sm">{buttonText}</span>
         <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
@@ -116,9 +122,13 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.96 }}
               transition={{ duration: 0.15 }}
-              className="absolute top-full left-0 mt-2 w-56 bg-[#1a1a1d] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50"
+              className="absolute top-full left-0 mt-2 w-56 rounded-2xl shadow-xl overflow-hidden z-50 border border-white/10"
+              style={{
+                background: 'linear-gradient(145deg, rgba(30, 50, 50, 0.95) 0%, rgba(20, 35, 35, 0.98) 100%)',
+                backdropFilter: 'blur(24px)',
+              }}
             >
-              <div className="p-1">
+              <div className="p-1.5">
                 {(Object.keys(STATUS_CONFIG) as BacklogStatus[]).map((status) => {
                   const statusConfig = STATUS_CONFIG[status];
                   const isSelected = currentStatus === status;
@@ -128,14 +138,14 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
                       key={status}
                       onClick={() => handleStatusSelect(status)}
                       className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors
+                        w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors
                         ${isSelected 
-                          ? `${statusConfig.bg} ${statusConfig.color}` 
-                          : 'text-gray-300 hover:bg-white/5'
+                          ? `bg-white/10 ${statusConfig.color}` 
+                          : 'text-white/70 hover:bg-white/5 hover:text-white'
                         }
                       `}
                     >
-                      <statusConfig.icon className={`w-4 h-4 ${isSelected ? '' : 'text-gray-500'}`} />
+                      <statusConfig.icon className={`w-4 h-4 ${isSelected ? '' : 'text-white/40'}`} />
                       <span className="flex-1 text-sm">{statusConfig.label}</span>
                       {isSelected && <Check className="w-4 h-4" />}
                     </button>
@@ -144,13 +154,13 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
               </div>
               
               {currentStatus && (
-                <div className="border-t border-white/5 p-1">
+                <div className="border-t border-white/10 p-1.5">
                   <button
                     onClick={() => {
                       removeMutation.mutate(game.id);
                       setIsOpen(false);
                     }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-red-400 hover:bg-red-500/10 transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-red-400 hover:bg-red-500/10 transition-colors"
                   >
                     <X className="w-4 h-4" />
                     <span className="text-sm">Remove from Backlog</span>

@@ -1,167 +1,310 @@
+'use client';
+
+import { useRef } from 'react';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { ArrowRight, Gamepad2, Trophy, BarChart3, Sparkles } from 'lucide-react';
+import Image from 'next/image';
+import { motion, AnimatePresence } from 'motion/react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
+import {
+  usePopularGames,
+  useTrendingGames,
+  useNewReleases,
+  useSearchGames,
+} from '@/hooks/use-games';
+import { useSearch } from '@/contexts/SearchContext';
+import { useDebounce } from '@/hooks/use-debounce';
+import FeaturedHero from '@/components/FeaturedHero';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { RAWGGame } from '@/types/game.types';
 
 export default function HomePage() {
+  const { data: session } = useSession();
+  const { query, isSearching } = useSearch();
+  const debouncedQuery = useDebounce(query, 300);
+
+  const { data: popularGames, isLoading: loadingPopular } = usePopularGames(20);
+  const { data: trendingGames, isLoading: loadingTrending } = useTrendingGames(20);
+  const { data: newReleases, isLoading: loadingNew } = useNewReleases(20);
+
+  const {
+    data: searchResults,
+    isLoading: loadingSearch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useSearchGames({ query: debouncedQuery });
+
+  const heroGames = popularGames?.results?.slice(0, 5) || [];
+  const searchGames = searchResults?.pages.flatMap((page) => page.results) || [];
+
   return (
-    <main className="relative">
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-transparent to-transparent" />
-          <div className="absolute top-1/4 -left-20 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] animate-pulse" />
-          <div className="absolute bottom-1/4 -right-20 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[120px] animate-pulse delay-1000" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/5 rounded-full blur-[150px]" />
-        </div>
+    <main className="min-h-screen pb-20">
 
-        <div 
-          className="absolute inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
-            backgroundSize: '60px 60px'
-          }}
-        />
-
-        <div className="container mx-auto px-4 py-24 relative z-10">
-          <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10 mb-8 backdrop-blur-sm">
-              <Sparkles className="w-4 h-4 text-amber-400" />
-              <span className="text-sm text-gray-300">Now tracking 500,000+ games</span>
+      <AnimatePresence mode="wait">
+        {isSearching ? (
+          <motion.div
+            key="search-results"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="px-6 lg:px-10"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h1 className="text-2xl font-semibold text-foreground">
+                  Search Results
+                </h1>
+                {searchResults?.pages[0]?.count !== undefined && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {searchResults.pages[0].count.toLocaleString()} games found
+                  </p>
+                )}
+              </div>
             </div>
 
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.1]">
-              <span className="text-white">Your gaming</span>
-              <br />
-              <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                journey awaits
-              </span>
-            </h1>
-
-            <p className="mt-8 text-lg md:text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto">
-              Track what you play. Remember what you loved. 
-              <br className="hidden sm:block" />
-              Share your favorites with the world.
-            </p>
-
-            <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                href="/register"
-                className="group px-8 py-4 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-semibold rounded-xl transition-all duration-300 flex items-center gap-2 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-105"
+            {loadingSearch && searchGames.length === 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-3">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.05 }}
+                  >
+                    <Skeleton className="aspect-[3/4] rounded-xl" />
+                    <Skeleton className="h-4 w-3/4 mt-3" />
+                    <Skeleton className="h-3 w-1/2 mt-2" />
+                  </motion.div>
+                ))}
+              </div>
+            ) : searchGames.length === 0 ? (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-20"
               >
-                Start your journey
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link
-                href="/games"
-                className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 backdrop-blur-sm"
-              >
-                Explore games
-              </Link>
+                <p className="text-muted-foreground">No games found for &quot;{debouncedQuery}&quot;</p>
+              </motion.div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-3">
+                  {searchGames.map((game, i) => (
+                    <motion.div
+                      key={game.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.03, duration: 0.3 }}
+                    >
+                      <SearchResultCard game={game} />
+                    </motion.div>
+                  ))}
+                </div>
+
+                {hasNextPage && (
+                  <div className="mt-12 text-center">
+                    <Button
+                      variant="outline"
+                      onClick={() => fetchNextPage()}
+                      disabled={isFetchingNextPage}
+                      className="rounded-full px-8 bg-white/5 border-white/10 hover:bg-white/10"
+                    >
+                      {isFetchingNextPage ? 'Loading...' : 'Load more'}
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </motion.div>
+        ) : (
+          <motion.div
+            key="home-content"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+          >
+            {loadingPopular ? (
+              <div className="mx-4 lg:mx-6">
+                <Skeleton className="h-[380px] lg:h-[420px] rounded-2xl lg:rounded-3xl" />
+              </div>
+            ) : (
+              heroGames.length > 0 && <FeaturedHero games={heroGames} />
+            )}
+
+            <div className="mt-10 space-y-10">
+              <CarouselSection
+                title="Popular"
+                games={popularGames?.results?.slice(5) || []}
+                isLoading={loadingPopular}
+              />
+
+              <CarouselSection
+                title="Trending"
+                games={trendingGames?.results || []}
+                isLoading={loadingTrending}
+              />
+
+              <CarouselSection
+                title="New Releases"
+                games={newReleases?.results || []}
+                isLoading={loadingNew}
+              />
+
+              {!session && (
+                <section className="text-center py-16 px-6">
+                  <h2 className="text-2xl font-semibold text-foreground mb-3">
+                    Track your gaming journey
+                  </h2>
+                  <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+                    Create your backlog, rank your favorites, and discover new games.
+                  </p>
+                  <Button asChild size="lg" className="rounded-full px-8 bg-white text-black hover:bg-white/90">
+                    <Link href="/register">Get Started</Link>
+                  </Button>
+                </section>
+              )}
             </div>
-
-            <div className="mt-20 grid grid-cols-3 gap-8 max-w-lg mx-auto">
-              <div>
-                <p className="text-3xl md:text-4xl font-bold text-white">500K+</p>
-                <p className="text-sm text-gray-500 mt-1">Games</p>
-              </div>
-              <div>
-                <p className="text-3xl md:text-4xl font-bold text-white">50+</p>
-                <p className="text-sm text-gray-500 mt-1">Platforms</p>
-              </div>
-              <div>
-                <p className="text-3xl md:text-4xl font-bold text-white">∞</p>
-                <p className="text-sm text-gray-500 mt-1">Memories</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-gray-500">
-          <span className="text-xs uppercase tracking-widest">Scroll</span>
-          <div className="w-px h-8 bg-gradient-to-b from-gray-500 to-transparent" />
-        </div>
-      </section>
-
-      <section className="py-32 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-950/5 to-transparent" />
-        
-        <div className="container mx-auto px-4 relative">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white">
-              Everything you need to
-              <br />
-              <span className="text-indigo-400">track your gaming life</span>
-            </h2>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
-            <FeatureCard
-              icon={<Gamepad2 className="w-6 h-6" />}
-              title="Track Your Backlog"
-              description="Keep track of what you're playing, what you've completed, and what's waiting in your ever-growing backlog."
-              gradient="from-blue-500 to-cyan-500"
-            />
-            <FeatureCard
-              icon={<Trophy className="w-6 h-6" />}
-              title="Rank Your Favorites"
-              description="Create your personal top 10 list and show the world your all-time favorite games. Flex your taste."
-              gradient="from-amber-500 to-orange-500"
-            />
-            <FeatureCard
-              icon={<BarChart3 className="w-6 h-6" />}
-              title="See Your Stats"
-              description="Discover patterns in your gaming habits. How many games did you beat this year? Let's find out."
-              gradient="from-emerald-500 to-teal-500"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="py-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/10 via-purple-600/10 to-pink-600/10" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-        
-        <div className="container mx-auto px-4 relative">
-          <div className="text-center max-w-2xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Ready to start?
-            </h2>
-            <p className="text-lg text-gray-400 mb-10">
-              Join thousands of gamers tracking their journey. It&apos;s free, forever.
-            </p>
-            <Link
-              href="/register"
-              className="inline-flex items-center gap-2 px-10 py-5 bg-white text-gray-900 font-bold rounded-xl hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-2xl"
-            >
-              Create your account
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-          </div>
-        </div>
-      </section>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
 
-function FeatureCard({ 
-  icon, 
-  title, 
-  description, 
-  gradient 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
-  description: string;
-  gradient: string;
-}) {
+function SearchResultCard({ game }: { game: RAWGGame }) {
   return (
-    <div className="group relative p-8 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all duration-500 hover:-translate-y-1">
-      <div className={`absolute -inset-px rounded-2xl bg-gradient-to-r ${gradient} opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500`} />
-      
-      <div className={`relative w-14 h-14 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-6 text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-        {icon}
+    <Link href={`/games/${game.slug}`} className="block group">
+      <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-card">
+        {game.background_image ? (
+          <Image
+            src={game.background_image}
+            alt={game.name}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 14vw"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-secondary">
+            <span className="text-3xl opacity-20">🎮</span>
+          </div>
+        )}
+        
+        {game.metacritic && (
+          <div className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-sm text-xs font-bold text-white">
+            {game.metacritic}
+          </div>
+        )}
       </div>
-      
-      <h3 className="relative text-xl font-semibold text-white mb-3">{title}</h3>
-      <p className="relative text-gray-500 leading-relaxed">{description}</p>
-    </div>
+      <div className="mt-3">
+        <p className="font-medium text-foreground line-clamp-1 group-hover:text-white/80 transition-colors">
+          {game.name}
+        </p>
+        {game.genres?.[0] && (
+          <p className="text-sm text-muted-foreground mt-0.5">{game.genres[0].name}</p>
+        )}
+      </div>
+    </Link>
+  );
+}
+
+function CarouselSection({
+  title,
+  games,
+  isLoading,
+}: {
+  title: string;
+  games: RAWGGame[];
+  isLoading: boolean;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (!scrollRef.current) return;
+    const scrollAmount = scrollRef.current.clientWidth * 0.75;
+    scrollRef.current.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth',
+    });
+  };
+
+  return (
+    <section>
+      <div className="flex items-center justify-between px-6 lg:px-10 mb-5">
+        <h2 className="text-xl font-semibold text-foreground">{title}</h2>
+        <div className="flex gap-2">
+          <button
+            onClick={() => scroll('left')}
+            className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 transition-colors border border-white/10"
+          >
+            <ChevronLeft className="w-4 h-4 text-white/70" />
+          </button>
+          <button
+            onClick={() => scroll('right')}
+            className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 transition-colors border border-white/10"
+          >
+            <ChevronRight className="w-4 h-4 text-white/70" />
+          </button>
+        </div>
+      </div>
+
+      <div
+        ref={scrollRef}
+        className="flex gap-4 overflow-x-auto scroll-smooth hide-scrollbar px-6 lg:px-10"
+      >
+        {isLoading
+          ? Array.from({ length: 10 }).map((_, i) => (
+              <div key={i} className="shrink-0 w-[calc(50vw-2rem)] sm:w-[calc(33vw-2rem)] md:w-[calc(25vw-2rem)] lg:w-[calc(16.66vw-3rem)] xl:w-[calc(14.28vw-3rem)] 2xl:w-[calc(12.5vw-3rem)] max-w-[180px]">
+                <Skeleton className="aspect-[3/4] rounded-xl" />
+                <Skeleton className="h-4 w-3/4 mt-3" />
+                <Skeleton className="h-3 w-1/2 mt-2" />
+              </div>
+            ))
+          : games.map((game) => (
+              <CarouselCard key={game.id} game={game} />
+            ))}
+      </div>
+    </section>
+  );
+}
+
+function CarouselCard({ game }: { game: RAWGGame }) {
+  return (
+    <Link
+      href={`/games/${game.slug}`}
+      className="shrink-0 w-[calc(50vw-2rem)] sm:w-[calc(33vw-2rem)] md:w-[calc(25vw-2rem)] lg:w-[calc(16.66vw-3rem)] xl:w-[calc(14.28vw-3rem)] 2xl:w-[calc(12.5vw-3rem)] max-w-[180px] group"
+    >
+      <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-card">
+        {game.background_image ? (
+          <Image
+            src={game.background_image}
+            alt={game.name}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 16vw, 14vw"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-secondary">
+            <span className="text-3xl opacity-20">🎮</span>
+          </div>
+        )}
+        
+        {game.metacritic && (
+          <div className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-sm text-xs font-bold text-white">
+            {game.metacritic}
+          </div>
+        )}
+      </div>
+      <div className="mt-3">
+        <p className="font-medium text-foreground line-clamp-1 group-hover:text-white/80 transition-colors">
+          {game.name}
+        </p>
+        {game.genres?.[0] && (
+          <p className="text-sm text-muted-foreground mt-0.5">{game.genres[0].name}</p>
+        )}
+      </div>
+    </Link>
   );
 }

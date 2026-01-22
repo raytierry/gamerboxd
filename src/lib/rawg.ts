@@ -8,6 +8,8 @@ interface SearchGamesParams {
   page?: number;
   pageSize?: number;
   ordering?: string;
+  dates?: string;
+  metacritic?: string;
 }
 
 export async function searchGames({
@@ -15,6 +17,8 @@ export async function searchGames({
   page = 1,
   pageSize = 20,
   ordering,
+  dates,
+  metacritic,
 }: SearchGamesParams = {}): Promise<RAWGResponse<RAWGGame>> {
   const params = new URLSearchParams({
     key: API_KEY!,
@@ -24,6 +28,8 @@ export async function searchGames({
 
   if (query) params.append('search', query);
   if (ordering) params.append('ordering', ordering);
+  if (dates) params.append('dates', dates);
+  if (metacritic) params.append('metacritic', metacritic);
 
   const response = await fetch(`${BASE_URL}/games?${params}`, {
     next: { revalidate: 60 },

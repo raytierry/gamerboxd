@@ -5,32 +5,38 @@ interface SearchParams {
   query?: string;
   pageSize?: number;
   ordering?: string;
+  dates?: string;
+  metacritic?: string;
 }
 
-async function fetchGames(params: SearchParams & { page: number }): Promise<RAWGResponse<RAWGGame>> {
+async function fetchGames(
+  params: SearchParams & { page: number }
+): Promise<RAWGResponse<RAWGGame>> {
   const searchParams = new URLSearchParams();
-  
+
   if (params.query) searchParams.set('query', params.query);
   if (params.page) searchParams.set('page', String(params.page));
   if (params.pageSize) searchParams.set('pageSize', String(params.pageSize));
   if (params.ordering) searchParams.set('ordering', params.ordering);
+  if (params.dates) searchParams.set('dates', params.dates);
+  if (params.metacritic) searchParams.set('metacritic', params.metacritic);
 
   const response = await fetch(`/api/games?${searchParams}`);
-  
+
   if (!response.ok) {
     throw new Error('Failed to fetch games');
   }
-  
+
   return response.json();
 }
 
 async function fetchGameBySlug(slug: string): Promise<RAWGGameDetails> {
   const response = await fetch(`/api/games/${slug}?screenshots=true`);
-  
+
   if (!response.ok) {
     throw new Error('Failed to fetch game');
   }
-  
+
   return response.json();
 }
 
@@ -47,10 +53,59 @@ export function useSearchGames(params: SearchParams) {
   });
 }
 
-export function usePopularGames(pageSize = 20) {
+export function usePopularGames(pageSize = 12) {
   return useQuery({
     queryKey: ['games', 'popular', pageSize],
     queryFn: () => fetchGames({ page: 1, pageSize, ordering: '-rating' }),
+  });
+}
+
+export function useTrendingGames(pageSize = 12) {
+  return useQuery({
+    queryKey: ['games', 'trending', pageSize],
+    queryFn: () =>
+      fetchGames({
+        page: 1,
+        pageSize,
+        ordering: '-added',
+        metacritic: '70,100',
+      }),
+  });
+}
+
+export function useNewReleases(pageSize = 12) {
+  const today = new Date();
+  const threeMonthsAgo = new Date(today);
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+  const dateRange = `${threeMonthsAgo.toISOString().split('T')[0]},${today.toISOString().split('T')[0]}`;
+
+  return useQuery({
+    queryKey: ['games', 'new-releases', pageSize],
+    queryFn: () =>
+      fetchGames({
+        page: 1,
+        pageSize,
+        ordering: '-released',
+        dates: dateRange,
+      }),
+  });
+}
+
+export function useUpcomingGames(pageSize = 12) {
+  const today = new Date();
+  const threeMonthsLater = new Date(today);
+  threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
+  const dateRange = `${today.toISOString().split('T')[0]},${threeMonthsLater.toISOString().split('T')[0]}`;
+
+  return useQuery({
+    queryKey: ['games', 'upcoming', pageSize],
+    queryFn: () =>
+      fetchGames({
+        page: 1,
+        pageSize,
+        ordering: 'released',
+        dates: dateRange,
+      }),
   });
 }
 
