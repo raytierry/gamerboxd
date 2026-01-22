@@ -8,29 +8,17 @@ import Image from 'next/image';
 import {
   LogOut,
   Gamepad2,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Pause,
   Heart,
+  BarChart3,
+  Trophy,
+  Settings,
+  Bell,
+  ChevronRight,
 } from 'lucide-react';
 import { useUserBacklog } from '@/hooks/use-backlog';
 import { useUserFavorites } from '@/hooks/use-favorites';
-import { BacklogStatus } from '@prisma/client';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import PageWrapper from '@/components/PageWrapper';
 import { Skeleton } from '@/components/ui/skeleton';
-
-const STATUS_CONFIG: Record<
-  BacklogStatus,
-  { label: string; icon: typeof Gamepad2; color: string }
-> = {
-  WANT_TO_PLAY: { label: 'Want to Play', icon: Gamepad2, color: 'text-blue-400' },
-  PLAYING: { label: 'Playing', icon: Clock, color: 'text-emerald-400' },
-  COMPLETED: { label: 'Completed', icon: CheckCircle, color: 'text-green-400' },
-  DROPPED: { label: 'Dropped', icon: XCircle, color: 'text-red-400' },
-  ON_HOLD: { label: 'On Hold', icon: Pause, color: 'text-amber-400' },
-};
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -46,14 +34,13 @@ export default function ProfilePage() {
 
   if (status === 'loading') {
     return (
-      <main className="p-6 lg:p-10 lg:pt-28 space-y-8">
-        <Skeleton className="h-20 w-64" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 rounded-2xl" />
-          ))}
+      <PageWrapper className="p-6 lg:p-10 lg:pt-28 pb-28 lg:pb-10">
+        <div className="flex flex-col items-center">
+          <Skeleton className="w-24 h-24 rounded-full" />
+          <Skeleton className="h-6 w-32 mt-4" />
+          <Skeleton className="h-4 w-48 mt-2" />
         </div>
-      </main>
+      </PageWrapper>
     );
   }
 
@@ -63,186 +50,196 @@ export default function ProfilePage() {
 
   const stats = {
     total: backlog.length,
-    playing: backlog.filter((g) => g.status === BacklogStatus.PLAYING).length,
-    completed: backlog.filter((g) => g.status === BacklogStatus.COMPLETED).length,
     favorites: favorites.length,
   };
 
   return (
-    <main className="p-6 lg:p-10 lg:pt-28 space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">
-            {session.user.name || 'Gamer'}
-          </h1>
-          <p className="text-muted-foreground">{session.user.email}</p>
+    <PageWrapper className="p-6 lg:p-10 lg:pt-28 pb-28 lg:pb-10 max-w-lg mx-auto">
+      {/* Profile Header */}
+      <div className="flex flex-col items-center mb-8">
+        <div className="relative w-24 h-24 rounded-full overflow-hidden bg-white/10 border-2 border-white/20">
+          {session.user.image ? (
+            <Image
+              src={session.user.image}
+              alt={session.user.name || 'Avatar'}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-3xl text-white/60">
+              {session.user.name?.[0]?.toUpperCase() || '?'}
+            </div>
+          )}
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
+        <h1 className="text-xl font-bold text-white mt-4">
+          {session.user.name || 'Gamer'}
+        </h1>
+        <p className="text-white/50 text-sm">{session.user.email}</p>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="flex justify-center gap-3 mb-8">
+        <QuickActionButton icon={Bell} label="Notifications" disabled />
+        <QuickActionButton icon={Settings} label="Settings" disabled />
+      </div>
+
+      {/* Stats Section */}
+      <section className="mb-8">
+        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3 px-1">
+          Overview
+        </h2>
+        <div className="grid grid-cols-2 gap-3">
+          <StatCard
+            icon={Gamepad2}
+            label="Backlog"
+            value={backlogLoading ? '-' : stats.total}
+          />
+          <StatCard
+            icon={Heart}
+            label="Favorites"
+            value={favoritesLoading ? '-' : stats.favorites}
+          />
+        </div>
+      </section>
+
+      {/* My Games Section */}
+      <section className="mb-8">
+        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3 px-1">
+          My Games
+        </h2>
+        <div className="space-y-2">
+          <LinkCard
+            href="/profile/backlog"
+            icon={Gamepad2}
+            label="My Backlog"
+            subtitle={backlogLoading ? '...' : `${stats.total} games`}
+          />
+          <LinkCard
+            href="/profile/favorites"
+            icon={Heart}
+            label="My Favorites"
+            subtitle={favoritesLoading ? '...' : `${stats.favorites} games`}
+          />
+        </div>
+      </section>
+
+      {/* Coming Soon Section */}
+      <section className="mb-8">
+        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3 px-1">
+          Coming Soon
+        </h2>
+        <div className="grid grid-cols-2 gap-3">
+          <ComingSoonCard icon={BarChart3} label="Statistics" />
+          <ComingSoonCard icon={Trophy} label="Achievements" />
+        </div>
+      </section>
+
+      {/* Sign Out */}
+      <div className="mt-auto">
+        <button
           onClick={() => signOut({ callbackUrl: '/' })}
-          className="gap-2 text-white/60 hover:text-white hover:bg-white/10"
+          className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-colors"
         >
-          <LogOut className="w-4 h-4" />
+          <LogOut className="w-5 h-5" />
           Sign out
-        </Button>
+        </button>
+        
+        <p className="text-center text-white/30 text-xs mt-6">
+          Gamerboxd v0.1.0
+        </p>
       </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard label="Total" value={backlogLoading ? '-' : stats.total} />
-        <StatCard label="Playing" value={backlogLoading ? '-' : stats.playing} />
-        <StatCard label="Completed" value={backlogLoading ? '-' : stats.completed} />
-        <StatCard label="Favorites" value={favoritesLoading ? '-' : stats.favorites} />
-      </div>
-
-      <Tabs defaultValue="backlog">
-        <TabsList 
-          className="p-1 rounded-xl border border-white/10 mb-6"
-          style={{
-            background: 'linear-gradient(145deg, rgba(45, 80, 75, 0.2) 0%, rgba(25, 45, 45, 0.3) 100%)',
-          }}
-        >
-          <TabsTrigger 
-            value="backlog"
-            className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-black"
-          >
-            Backlog
-          </TabsTrigger>
-          <TabsTrigger 
-            value="favorites"
-            className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-black"
-          >
-            Favorites
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="backlog">
-          {backlogLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-20 rounded-2xl" />
-              ))}
-            </div>
-          ) : backlog.length > 0 ? (
-            <div className="space-y-3">
-              {backlog.map((game) => {
-                const statusConfig = STATUS_CONFIG[game.status];
-                const StatusIcon = statusConfig.icon;
-                return (
-                  <Link
-                    key={game.id}
-                    href={`/games/${game.gameSlug}`}
-                    className="flex items-center gap-4 p-4 rounded-2xl border border-white/10 hover:bg-white/5 transition-colors"
-                    style={{
-                      background: 'linear-gradient(145deg, rgba(45, 80, 75, 0.1) 0%, rgba(25, 45, 45, 0.15) 100%)',
-                    }}
-                  >
-                    {game.gameImage && (
-                      <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0">
-                        <Image
-                          src={game.gameImage}
-                          alt={game.gameName}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground truncate">
-                        {game.gameName}
-                      </p>
-                      <p className={`text-sm ${statusConfig.color} flex items-center gap-1.5`}>
-                        <StatusIcon className="w-3.5 h-3.5" />
-                        {statusConfig.label}
-                      </p>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          ) : (
-            <EmptyState message="Your backlog is empty" />
-          )}
-        </TabsContent>
-
-        <TabsContent value="favorites">
-          {favoritesLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-24 rounded-2xl" />
-              ))}
-            </div>
-          ) : favorites.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {favorites.map((game) => (
-                <Link
-                  key={game.id}
-                  href={`/games/${game.gameSlug}`}
-                  className="flex items-center gap-4 p-4 rounded-2xl border border-white/10 hover:bg-white/5 transition-colors"
-                  style={{
-                    background: 'linear-gradient(145deg, rgba(45, 80, 75, 0.1) 0%, rgba(25, 45, 45, 0.15) 100%)',
-                  }}
-                >
-                  <div 
-                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold border border-white/10"
-                    style={{
-                      background: 'linear-gradient(145deg, rgba(45, 80, 75, 0.3) 0%, rgba(25, 45, 45, 0.4) 100%)',
-                    }}
-                  >
-                    {game.rank}
-                  </div>
-                  {game.gameImage && (
-                    <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0">
-                      <Image
-                        src={game.gameImage}
-                        alt={game.gameName}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground truncate">
-                      {game.gameName}
-                    </p>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                      <Heart className="w-3.5 h-3.5" />
-                      #{game.rank} Favorite
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <EmptyState message="No favorites yet" />
-          )}
-        </TabsContent>
-      </Tabs>
-    </main>
+    </PageWrapper>
   );
 }
 
-function StatCard({ label, value }: { label: string; value: number | string }) {
+function QuickActionButton({ 
+  icon: Icon, 
+  label, 
+  disabled 
+}: { 
+  icon: typeof Bell; 
+  label: string; 
+  disabled?: boolean;
+}) {
   return (
-    <div 
-      className="p-5 rounded-2xl border border-white/10"
+    <button
+      disabled={disabled}
+      className="p-4 rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      title={disabled ? 'Coming soon' : label}
+    >
+      <Icon className="w-5 h-5" />
+    </button>
+  );
+}
+
+function StatCard({ 
+  icon: Icon, 
+  label, 
+  value 
+}: { 
+  icon: typeof Gamepad2; 
+  label: string; 
+  value: number | string;
+}) {
+  return (
+    <div
+      className="p-5 rounded-2xl border border-white/[0.08] text-center"
       style={{
-        background: 'linear-gradient(145deg, rgba(45, 80, 75, 0.15) 0%, rgba(25, 45, 45, 0.2) 100%)',
+        background: 'linear-gradient(145deg, rgba(45, 80, 75, 0.12) 0%, rgba(25, 45, 45, 0.15) 100%)',
       }}
     >
-      <p className="text-3xl font-bold text-foreground">{value}</p>
-      <p className="text-sm text-muted-foreground">{label}</p>
+      <Icon className="w-5 h-5 text-white/30 mx-auto mb-2" />
+      <p className="text-3xl font-bold text-white">{value}</p>
+      <p className="text-sm text-white/40">{label}</p>
     </div>
   );
 }
 
-function EmptyState({ message }: { message: string }) {
+function LinkCard({
+  href,
+  icon: Icon,
+  label,
+  subtitle,
+}: {
+  href: string;
+  icon: typeof Gamepad2;
+  label: string;
+  subtitle: string;
+}) {
   return (
-    <div className="text-center py-16">
-      <p className="text-muted-foreground mb-6">{message}</p>
-      <Button asChild className="rounded-full bg-white text-black hover:bg-white/90">
-        <Link href="/">Discover Games</Link>
-      </Button>
+    <Link
+      href={href}
+      className="flex items-center gap-4 p-4 rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] hover:border-white/20 transition-all group"
+    >
+      <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+        <Icon className="w-5 h-5 text-white/60" />
+      </div>
+      <div className="flex-1">
+        <p className="font-medium text-white">{label}</p>
+        <p className="text-sm text-white/40">{subtitle}</p>
+      </div>
+      <ChevronRight className="w-5 h-5 text-white/30 group-hover:text-white/60 group-hover:translate-x-0.5 transition-all" />
+    </Link>
+  );
+}
+
+function ComingSoonCard({
+  icon: Icon,
+  label,
+}: {
+  icon: typeof Gamepad2;
+  label: string;
+}) {
+  return (
+    <div
+      className="p-5 rounded-2xl border border-dashed border-white/[0.08] text-center opacity-50"
+      style={{
+        background: 'rgba(255,255,255,0.01)',
+      }}
+    >
+      <Icon className="w-5 h-5 text-white/20 mx-auto mb-2" />
+      <p className="text-sm font-medium text-white/40">{label}</p>
+      <p className="text-xs text-white/20 mt-1">Coming soon</p>
     </div>
   );
 }

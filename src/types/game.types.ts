@@ -25,6 +25,11 @@ export interface RAWGGame {
     name: string;
     slug: string;
   }[];
+  tags?: {
+    id: number;
+    name: string;
+    slug: string;
+  }[];
   stores: {
     store: {
       id: number;

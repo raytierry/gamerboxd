@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/', label: 'Home' },
+  { href: '/search', label: 'Search' },
 ];
 
 export default function TopNav() {
@@ -25,8 +26,14 @@ export default function TopNav() {
 
   const handleSearchChange = (value: string) => {
     setQuery(value);
-    if (value && pathname !== '/') {
-      router.push('/');
+    if (value && pathname !== '/search') {
+      router.push('/search');
+    }
+  };
+
+  const handleSearchFocus = () => {
+    if (pathname !== '/search') {
+      router.push('/search');
     }
   };
 
@@ -77,6 +84,7 @@ export default function TopNav() {
             type="text"
             value={query}
             onChange={(e) => handleSearchChange(e.target.value)}
+            onFocus={handleSearchFocus}
             placeholder="Search games..."
             className="flex-1 min-w-0 bg-transparent text-sm text-white placeholder:text-white/40 outline-none border-none ring-0 focus:ring-0 focus:outline-none"
           />

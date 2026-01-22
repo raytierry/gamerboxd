@@ -1,0 +1,1 @@
+export { FavoriteConflictModal } from './FavoriteConflictModal';

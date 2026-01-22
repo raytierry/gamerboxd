@@ -12,6 +12,23 @@ interface SearchGamesParams {
   metacritic?: string;
 }
 
+const BLOCKED_TAGS = [
+  'sexual-content',
+  'nsfw',
+  'hentai',
+  'adult',
+  'erotic',
+  'nudity',
+];
+
+function filterAdultContent(games: RAWGGame[]): RAWGGame[] {
+  return games.filter((game) => {
+    if (!game.tags) return true;
+    const gameTags = game.tags.map((tag) => tag.slug.toLowerCase());
+    return !BLOCKED_TAGS.some((blocked) => gameTags.includes(blocked));
+  });
+}
+
 export async function searchGames({
   query,
   page = 1,
@@ -39,7 +56,12 @@ export async function searchGames({
     throw new Error(`RAWG API error: ${response.status}`);
   }
 
-  return response.json();
+  const data: RAWGResponse<RAWGGame> = await response.json();
+  
+  return {
+    ...data,
+    results: filterAdultContent(data.results),
+  };
 }
 
 export async function getGameBySlug(slug: string): Promise<RAWGGameDetails> {
