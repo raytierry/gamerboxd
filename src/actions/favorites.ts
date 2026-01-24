@@ -35,7 +35,7 @@ export async function checkRankConflict(rank: number, currentGameId?: number) {
   }
 
   try {
-    const existingAtRank = await prisma.favoriteGame.findUnique({
+    const existingAtRank = await prisma.favorite_games.findUnique({
       where: {
         userId_rank: {
           userId: session.user.id,
@@ -71,7 +71,7 @@ export async function getUsedRanks() {
   }
 
   try {
-    const favorites = await prisma.favoriteGame.findMany({
+    const favorites = await prisma.favorite_games.findMany({
       where: { userId: session.user.id },
       select: { rank: true, gameId: true },
     });
@@ -98,7 +98,7 @@ export async function addToFavorites(
   }
 
   try {
-    const existingAtRank = await prisma.favoriteGame.findUnique({
+    const existingAtRank = await prisma.favorite_games.findUnique({
       where: {
         userId_rank: {
           userId: session.user.id,
@@ -107,7 +107,7 @@ export async function addToFavorites(
       },
     });
 
-    const currentGameEntry = await prisma.favoriteGame.findUnique({
+    const currentGameEntry = await prisma.favorite_games.findUnique({
       where: {
         userId_gameId: {
           userId: session.user.id,
@@ -137,17 +137,17 @@ export async function addToFavorites(
 
       if (conflictResolution.type === 'replace') {
         await prisma.$transaction(async (tx) => {
-          await tx.favoriteGame.delete({
+          await tx.favorite_games.delete({
             where: { id: existingAtRank.id },
           });
 
           if (currentGameEntry) {
-            await tx.favoriteGame.update({
+            await tx.favorite_games.update({
               where: { id: currentGameEntry.id },
               data: { rank },
             });
           } else {
-            await tx.favoriteGame.create({
+            await tx.favorite_games.create({
               data: {
                 userId: session.user.id,
                 gameId: game.gameId,
@@ -170,27 +170,27 @@ export async function addToFavorites(
           if (currentGameEntry) {
             const tempRank = -1;
 
-            await tx.favoriteGame.update({
+            await tx.favorite_games.update({
               where: { id: existingAtRank.id },
               data: { rank: tempRank },
             });
 
-            await tx.favoriteGame.update({
+            await tx.favorite_games.update({
               where: { id: currentGameEntry.id },
               data: { rank },
             });
 
-            await tx.favoriteGame.update({
+            await tx.favorite_games.update({
               where: { id: existingAtRank.id },
               data: { rank: newRankForOld },
             });
           } else {
-            await tx.favoriteGame.update({
+            await tx.favorite_games.update({
               where: { id: existingAtRank.id },
               data: { rank: newRankForOld },
             });
 
-            await tx.favoriteGame.create({
+            await tx.favorite_games.create({
               data: {
                 userId: session.user.id,
                 gameId: game.gameId,
@@ -205,12 +205,12 @@ export async function addToFavorites(
       }
     } else {
       if (currentGameEntry) {
-        await prisma.favoriteGame.update({
+        await prisma.favorite_games.update({
           where: { id: currentGameEntry.id },
           data: { rank },
         });
       } else {
-        await prisma.favoriteGame.create({
+        await prisma.favorite_games.create({
           data: {
             userId: session.user.id,
             gameId: game.gameId,
@@ -240,7 +240,7 @@ export async function removeFromFavorites(gameId: number) {
   }
 
   try {
-    await prisma.favoriteGame.delete({
+    await prisma.favorite_games.delete({
       where: {
         userId_gameId: {
           userId: session.user.id,
@@ -266,7 +266,7 @@ export async function getFavoriteStatus(gameId: number) {
   }
 
   try {
-    const entry = await prisma.favoriteGame.findUnique({
+    const entry = await prisma.favorite_games.findUnique({
       where: {
         userId_gameId: {
           userId: session.user.id,
@@ -289,7 +289,7 @@ export async function getUserFavorites() {
   }
 
   try {
-    const favorites = await prisma.favoriteGame.findMany({
+    const favorites = await prisma.favorite_games.findMany({
       where: { userId: session.user.id },
       orderBy: { rank: 'asc' },
     });

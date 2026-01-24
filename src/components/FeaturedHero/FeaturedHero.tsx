@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { Play, Star } from 'lucide-react';
+import { HERO_PLACEHOLDER } from '@/lib/image-placeholder';
 import type { RAWGGame } from '@/types/game.types';
 import { formatRating } from '@/lib/format';
 
@@ -45,15 +46,38 @@ export default function FeaturedHero({ games }: FeaturedHeroProps) {
 
   return (
     <section className="relative h-full w-full overflow-hidden">
-      {games.slice(0, 5).map((game, index) => {
+      {/* Preload first image outside animation for faster LCP */}
+      {games[0] && getHeroImage(games[0]) && (
+        <div
+          className="absolute inset-0"
+          style={{
+            opacity: currentIndex === 0 ? 1 : 0,
+            transition: shouldReduce ? 'none' : 'opacity 1.2s ease-in-out'
+          }}
+        >
+          <Image
+            src={getHeroImage(games[0])!}
+            alt={games[0].name}
+            fill
+            priority
+            fetchPriority="high"
+            placeholder="blur"
+            blurDataURL={HERO_PLACEHOLDER}
+            className="object-cover"
+            sizes="100vw"
+          />
+        </div>
+      )}
+      {games.slice(1, 5).map((game, index) => {
         const heroImage = getHeroImage(game);
+        const actualIndex = index + 1;
         return (
           <motion.div
             key={game.id}
             initial={false}
             animate={{
-              opacity: index === currentIndex ? 1 : 0,
-              scale: index === currentIndex ? 1 : 1.1,
+              opacity: actualIndex === currentIndex ? 1 : 0,
+              scale: actualIndex === currentIndex ? 1 : 1.1,
             }}
             transition={{ duration: shouldReduce ? 0.01 : 1.2, ease: 'easeInOut' }}
             className="absolute inset-0"
@@ -63,8 +87,9 @@ export default function FeaturedHero({ games }: FeaturedHeroProps) {
                 src={heroImage}
                 alt={game.name}
                 fill
-                priority={index === 0}
-                loading={index === 0 ? undefined : "lazy"}
+                loading="lazy"
+                placeholder="blur"
+                blurDataURL={HERO_PLACEHOLDER}
                 className="object-cover"
                 sizes="100vw"
               />

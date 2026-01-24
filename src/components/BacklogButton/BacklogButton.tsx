@@ -78,7 +78,7 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
 
   if (isLoading) {
     return (
-      <div className="h-11 w-44 rounded-full animate-pulse border border-white/10 glass-button" />
+      <div className="h-11 w-44 rounded-full animate-pulse border border-border glass-button" />
     );
   }
 
@@ -93,12 +93,15 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
         onClick={() => setIsOpen(!isOpen)}
         disabled={isPending}
         className={`
-          flex items-center gap-2 h-11 px-5 rounded-full font-medium transition-all duration-200 min-w-[180px] border border-white/10
-          ${currentStatus 
-            ? `${config?.color} glass-button`
-            : 'bg-white text-black hover:bg-white/90'
+          flex items-center justify-center gap-2 h-11 px-4 rounded-xl font-medium transition-all duration-200 w-full
+          ${currentStatus
+            ? `${config?.color} nav-glass border border-border/50`
+            : 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl'
           }
         `}
+        style={currentStatus ? {
+          boxShadow: 'var(--nav-shadow)',
+        } : undefined}
       >
         <span className="relative w-5 h-5 flex items-center justify-center">
           <motion.span
@@ -116,20 +119,20 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
             )}
           </motion.span>
         </span>
-        <span className="flex-1 text-left text-sm">{buttonText}</span>
-        <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <span className="flex-1 text-center text-sm whitespace-nowrap overflow-hidden text-ellipsis">{buttonText}</span>
+        <ChevronDown className={`w-4 h-4 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>
         {isOpen && (
           <>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={fadeTransition}
-              className="fixed inset-0 z-40 bg-black/50 sm:bg-transparent" 
-              onClick={() => setIsOpen(false)} 
+              className="fixed inset-0 z-40 bg-black/50 dark:bg-black/50 sm:bg-transparent"
+              onClick={() => setIsOpen(false)}
             />
 
             <motion.div
@@ -143,21 +146,21 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
               dragConstraints={{ top: 0, bottom: 0 }}
               dragElastic={{ top: 0, bottom: 0.5 }}
               onDragEnd={handleDragEnd}
-              className="fixed inset-x-0 bottom-0 p-4 pb-8 rounded-t-3xl z-50 sm:hidden border-t border-white/10 touch-none glass-modal"
+              className="fixed inset-x-0 bottom-0 p-4 pb-8 rounded-t-3xl z-50 sm:hidden border-t border-border touch-none glass-modal"
             >
-              <div 
-                className="w-12 h-1 bg-white/30 rounded-full mx-auto mb-4 cursor-grab active:cursor-grabbing"
+              <div
+                className="w-12 h-1 bg-muted-foreground/30 rounded-full mx-auto mb-4 cursor-grab active:cursor-grabbing"
                 onPointerDown={(e) => dragControls.start(e)}
               />
 
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Gamepad2 className="h-5 w-5 text-emerald-400" />
-                  <span className="font-medium text-white">Set status</span>
+                  <span className="font-medium text-foreground">Set status</span>
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-2 text-white/40 hover:text-white transition-colors"
+                  className="p-2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -176,13 +179,13 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
                       disabled={isPending}
                       className={`
                         w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left transition-colors
-                        ${isSelected 
-                          ? `bg-white/10 ${statusConfig.color}` 
-                          : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+                        ${isSelected
+                          ? `bg-secondary ${statusConfig.color}`
+                          : 'bg-secondary/50 text-muted-foreground hover:bg-secondary hover:text-foreground'
                         }
                       `}
                     >
-                      <StatusIcon className={`w-5 h-5 ${isSelected ? '' : 'text-white/40'}`} />
+                      <StatusIcon className={`w-5 h-5 ${isSelected ? '' : 'text-muted-foreground/50'}`} />
                       <span className="flex-1">{statusConfig.label}</span>
                       {isSelected && <Check className="w-5 h-5" />}
                     </button>
@@ -209,26 +212,26 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
               animate={shouldReduce ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
               exit={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.96 }}
               transition={fadeTransition}
-              className="hidden sm:block absolute top-full left-0 mt-2 w-56 rounded-2xl shadow-xl overflow-hidden z-50 border border-white/10 glass-modal"
+              className="hidden sm:block absolute top-full left-0 mt-2 w-56 rounded-2xl shadow-xl overflow-hidden z-50 border border-border glass-modal"
             >
               <div className="p-1.5">
                 {(Object.keys(STATUS_CONFIG) as BacklogStatus[]).map((status) => {
                   const statusConfig = STATUS_CONFIG[status];
                   const isSelected = currentStatus === status;
-                  
+
                   return (
                     <button
                       key={status}
                       onClick={() => handleStatusSelect(status)}
                       className={`
                         w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors
-                        ${isSelected 
-                          ? `bg-white/10 ${statusConfig.color}` 
-                          : 'text-white/70 hover:bg-white/5 hover:text-white'
+                        ${isSelected
+                          ? `bg-secondary ${statusConfig.color}`
+                          : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
                         }
                       `}
                     >
-                      <statusConfig.icon className={`w-4 h-4 ${isSelected ? '' : 'text-white/40'}`} />
+                      <statusConfig.icon className={`w-4 h-4 ${isSelected ? '' : 'text-muted-foreground/50'}`} />
                       <span className="flex-1 text-sm">{statusConfig.label}</span>
                       {isSelected && <Check className="w-4 h-4" />}
                     </button>
@@ -237,7 +240,7 @@ export default function BacklogButton({ game, isAuthenticated }: BacklogButtonPr
               </div>
               
               {currentStatus && (
-                <div className="border-t border-white/10 p-1.5">
+                <div className="border-t border-border p-1.5">
                   <button
                     onClick={() => {
                       removeMutation.mutate(game.id);

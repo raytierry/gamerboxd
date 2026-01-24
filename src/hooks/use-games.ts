@@ -6,7 +6,7 @@ interface SearchParams {
   pageSize?: number;
   ordering?: string;
   dates?: string;
-  metacritic?: string;
+  minRating?: number;
 }
 
 async function fetchGames(
@@ -19,7 +19,7 @@ async function fetchGames(
   if (params.pageSize) searchParams.set('pageSize', String(params.pageSize));
   if (params.ordering) searchParams.set('ordering', params.ordering);
   if (params.dates) searchParams.set('dates', params.dates);
-  if (params.metacritic) searchParams.set('metacritic', params.metacritic);
+  if (params.minRating) searchParams.set('minRating', String(params.minRating));
 
   const response = await fetch(`/api/games?${searchParams}`);
 
@@ -63,11 +63,11 @@ export function usePopularGames(pageSize = 12) {
 export function useHighlightGames(pageSize = 10) {
   return useQuery({
     queryKey: ['games', 'highlight', pageSize],
-    queryFn: () => fetchGames({ 
-      page: 1, 
-      pageSize, 
-      ordering: '-metacritic',
-      metacritic: '85,100',
+    queryFn: () => fetchGames({
+      page: 1,
+      pageSize,
+      ordering: '-aggregated_rating',
+      minRating: 85,
     }),
   });
 }
@@ -79,8 +79,8 @@ export function useTrendingGames(pageSize = 12) {
       fetchGames({
         page: 1,
         pageSize,
-        ordering: '-added',
-        metacritic: '70,100',
+        ordering: '-rating',
+        minRating: 70,
       }),
   });
 }
@@ -97,7 +97,7 @@ export function useNewReleases(pageSize = 12) {
       fetchGames({
         page: 1,
         pageSize,
-        ordering: '-released',
+        ordering: '-first_release_date',
         dates: dateRange,
       }),
   });
@@ -115,7 +115,7 @@ export function useUpcomingGames(pageSize = 12) {
       fetchGames({
         page: 1,
         pageSize,
-        ordering: 'released',
+        ordering: 'first_release_date',
         dates: dateRange,
       }),
   });

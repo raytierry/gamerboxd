@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { X, AlertTriangle, Trophy, ArrowRight, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence, useDragControls, useReducedMotion, PanInfo } from 'motion/react';
 import type { ConflictingGame, ConflictResolution } from '@/hooks/use-favorites';
+import { RANK_GRADIENT_CLASSES } from '@/constants';
 
 interface FavoriteConflictModalProps {
   isOpen: boolean;
@@ -17,19 +18,6 @@ interface FavoriteConflictModalProps {
   currentGameRank?: number;
   isPending?: boolean;
 }
-
-const RANK_COLORS = [
-  'from-amber-400 to-yellow-500',
-  'from-slate-300 to-slate-400',
-  'from-amber-600 to-amber-700',
-  'from-indigo-400 to-indigo-500',
-  'from-purple-400 to-purple-500',
-  'from-pink-400 to-pink-500',
-  'from-rose-400 to-rose-500',
-  'from-orange-400 to-orange-500',
-  'from-teal-400 to-teal-500',
-  'from-cyan-400 to-cyan-500',
-];
 
 export function FavoriteConflictModal({
   isOpen,
@@ -107,11 +95,11 @@ export function FavoriteConflictModal({
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 0.5 }}
             onDragEnd={handleDragEnd}
-            className="fixed inset-x-0 bottom-0 z-50 sm:hidden rounded-t-3xl border-t border-white/10 overflow-hidden touch-none glass-modal"
+            className="fixed inset-x-0 bottom-0 z-50 sm:hidden rounded-t-3xl overflow-hidden touch-none glass-modal nav-border modal-shadow-bottom"
           >
-            <div className="p-4 pb-8">
-              <div 
-                className="w-12 h-1 bg-white/30 rounded-full mx-auto mb-4 cursor-grab active:cursor-grabbing"
+            <div className="p-6 pb-8">
+              <div
+                className="w-12 h-1.5 bg-muted-foreground/30 rounded-full mx-auto mb-6 cursor-grab active:cursor-grabbing"
                 onPointerDown={(e) => dragControls.start(e)}
               />
 
@@ -124,23 +112,25 @@ export function FavoriteConflictModal({
                     exit={shouldReduce ? { opacity: 0 } : { opacity: 0, x: -20 }}
                     transition={slideTransition}
                   >
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2 text-amber-400">
-                        <AlertTriangle className="h-5 w-5" />
-                        <span className="font-medium">Rank Conflict</span>
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-amber-400/10 border border-amber-400/20">
+                          <AlertTriangle className="h-5 w-5 text-amber-400" />
+                        </div>
+                        <span className="font-semibold text-lg text-foreground">Rank Conflict</span>
                       </div>
                       <button
                         onClick={onClose}
-                        className="p-2 text-white/40 hover:text-white transition-colors"
+                        className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
                       >
                         <X className="h-5 w-5" />
                       </button>
                     </div>
 
-                    <div className="mb-6 p-4 rounded-2xl bg-white/5 border border-white/10">
-                      <div className="flex items-center gap-3">
+                    <div className="mb-6 p-5 rounded-2xl glass-card nav-border">
+                      <div className="flex items-center gap-4">
                         {conflictingGame.gameImage && (
-                          <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0">
+                          <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-border/50">
                             <Image
                               src={conflictingGame.gameImage}
                               alt={conflictingGame.gameName}
@@ -150,28 +140,33 @@ export function FavoriteConflictModal({
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-white/50">Currently at #{targetRank}</p>
-                          <p className="font-medium text-white truncate">
+                          <p className="text-xs text-muted-foreground/80 mb-1">Currently at #{targetRank}</p>
+                          <p className="font-semibold text-foreground truncate">
                             {conflictingGame.gameName}
                           </p>
                         </div>
                         <div
-                          className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white bg-gradient-to-br ${RANK_COLORS[targetRank - 1]}`}
+                          className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-white bg-linear-to-br ${RANK_GRADIENT_CLASSES[targetRank - 1]} shadow-lg`}
                         >
                           {targetRank}
                         </div>
                       </div>
                     </div>
 
-                    <p className="text-white/60 text-sm mb-4 text-center">
-                      <span className="text-white font-medium">{newGameName}</span> wants to be #{targetRank}
+                    <p className="text-muted-foreground text-sm mb-6 text-center">
+                      <span className="text-foreground font-semibold">{newGameName}</span> wants to be #{targetRank}
                     </p>
 
                     <div className="space-y-3">
                       <button
                         onClick={handleReplace}
                         disabled={isPending}
-                        className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30 transition-colors disabled:opacity-50"
+                        className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium transition-all disabled:opacity-50"
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.15)',
+                          border: '1px solid rgba(239, 68, 68, 0.3)',
+                          color: '#fca5a5',
+                        }}
                       >
                         <Trash2 className="w-4 h-4" />
                         Replace (remove {conflictingGame.gameName.length > 15 ? conflictingGame.gameName.slice(0, 15) + '...' : conflictingGame.gameName})
@@ -181,7 +176,7 @@ export function FavoriteConflictModal({
                         <button
                           onClick={() => setShowReassignPicker(true)}
                           disabled={isPending}
-                          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors disabled:opacity-50"
+                          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium text-foreground transition-all disabled:opacity-50 nav-glass nav-border nav-shadow"
                         >
                           <ArrowRight className="w-4 h-4" />
                           Move to another rank
@@ -191,7 +186,7 @@ export function FavoriteConflictModal({
                       <button
                         onClick={onClose}
                         disabled={isPending}
-                        className="w-full py-3 text-white/50 hover:text-white transition-colors"
+                        className="w-full py-3.5 text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
                       >
                         Cancel
                       </button>
@@ -205,30 +200,32 @@ export function FavoriteConflictModal({
                     exit={shouldReduce ? { opacity: 0 } : { opacity: 0, x: 20 }}
                     transition={slideTransition}
                   >
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between mb-6">
                       <button
                         onClick={() => setShowReassignPicker(false)}
-                        className="flex items-center gap-2 text-white/60 hover:text-white transition-colors"
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
                       >
                         <ArrowRight className="w-4 h-4 rotate-180" />
-                        Back
+                        <span className="font-medium">Back</span>
                       </button>
                       <button
                         onClick={onClose}
-                        className="p-2 text-white/40 hover:text-white transition-colors"
+                        className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
                       >
                         <X className="h-5 w-5" />
                       </button>
                     </div>
 
-                    <div className="flex items-center gap-2 mb-4">
-                      <Trophy className="h-5 w-5 text-amber-400" />
-                      <span className="font-medium text-white">
+                    <div className="flex items-center gap-2.5 mb-5">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-amber-400/10 border border-amber-400/20">
+                        <Trophy className="h-5 w-5 text-amber-400" />
+                      </div>
+                      <span className="font-semibold text-foreground">
                         New rank for {conflictingGame.gameName.length > 20 ? conflictingGame.gameName.slice(0, 20) + '...' : conflictingGame.gameName}
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-5 gap-3">
+                    <div className="grid grid-cols-5 gap-3 mb-4">
                       {Array.from({ length: 10 }, (_, i) => i + 1).map((rank) => {
                         const isAvailable = availableRanks.includes(rank);
                         const isTarget = rank === targetRank;
@@ -239,14 +236,18 @@ export function FavoriteConflictModal({
                             onClick={() => isAvailable && handleReassign(rank)}
                             disabled={!isAvailable || isPending}
                             className={`
-                              h-14 rounded-xl font-bold text-lg
+                              h-16 rounded-xl font-bold text-lg
                               transition-all
                               ${isAvailable
-                                ? `bg-gradient-to-br ${RANK_COLORS[rank - 1]} text-white shadow-lg active:brightness-90`
-                                : 'bg-white/5 text-white/20 cursor-not-allowed'
+                                ? `bg-linear-to-br ${RANK_GRADIENT_CLASSES[rank - 1]} text-white shadow-lg active:brightness-90`
+                                : 'text-muted-foreground/30 cursor-not-allowed'
                               }
-                              ${isTarget ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-black/50' : ''}
+                              ${isTarget ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-background' : ''}
                             `}
+                            style={!isAvailable ? {
+                              background: 'linear-gradient(180deg, var(--glass-card-from) 0%, var(--glass-card-to) 100%)',
+                              border: '1px solid var(--nav-border-color)',
+                            } : undefined}
                           >
                             {rank}
                           </motion.button>
@@ -254,8 +255,8 @@ export function FavoriteConflictModal({
                       })}
                     </div>
 
-                    <p className="text-white/40 text-xs text-center mt-4">
-                      Highlighted ranks are available
+                    <p className="text-muted-foreground/70 text-xs text-center">
+                      Select an available rank for {conflictingGame.gameName.length > 25 ? conflictingGame.gameName.slice(0, 25) + '...' : conflictingGame.gameName}
                     </p>
                   </motion.div>
                 )}
@@ -268,9 +269,9 @@ export function FavoriteConflictModal({
             animate={shouldReduce ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
             exit={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 20 }}
             transition={fadeTransition}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md hidden sm:block rounded-2xl border border-white/10 overflow-hidden glass-modal"
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg hidden sm:block rounded-3xl overflow-hidden glass-modal nav-border modal-shadow"
           >
-            <div className="p-6">
+            <div className="p-8">
               <AnimatePresence mode="wait">
                 {!showReassignPicker ? (
                   <motion.div
@@ -280,23 +281,25 @@ export function FavoriteConflictModal({
                     exit={shouldReduce ? { opacity: 0 } : { opacity: 0, x: -20 }}
                     transition={slideTransition}
                   >
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2 text-amber-400">
-                        <AlertTriangle className="h-5 w-5" />
-                        <span className="font-semibold text-lg">Rank Conflict</span>
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-amber-400/10 border border-amber-400/20">
+                          <AlertTriangle className="h-5 w-5 text-amber-400" />
+                        </div>
+                        <span className="font-semibold text-xl text-foreground">Rank Conflict</span>
                       </div>
                       <button
                         onClick={onClose}
-                        className="p-2 -mr-2 text-white/40 hover:text-white transition-colors rounded-lg hover:bg-white/10"
+                        className="p-2.5 -mr-2 text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-secondary/50"
                       >
                         <X className="h-5 w-5" />
                       </button>
                     </div>
 
-                    <div className="mb-6 p-4 rounded-xl bg-white/5 border border-white/10">
+                    <div className="mb-6 p-5 rounded-2xl glass-card nav-border">
                       <div className="flex items-center gap-4">
                         {conflictingGame.gameImage && (
-                          <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0">
+                          <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-border/50">
                             <Image
                               src={conflictingGame.gameImage}
                               alt={conflictingGame.gameName}
@@ -306,28 +309,33 @@ export function FavoriteConflictModal({
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-white/50">Currently at #{targetRank}</p>
-                          <p className="font-medium text-white truncate">
+                          <p className="text-xs text-muted-foreground/80 mb-1">Currently at #{targetRank}</p>
+                          <p className="font-semibold text-base text-foreground truncate">
                             {conflictingGame.gameName}
                           </p>
                         </div>
                         <div
-                          className={`w-11 h-11 rounded-lg flex items-center justify-center font-bold text-white bg-gradient-to-br ${RANK_COLORS[targetRank - 1]}`}
+                          className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg text-white bg-linear-to-br ${RANK_GRADIENT_CLASSES[targetRank - 1]} shadow-lg`}
                         >
                           {targetRank}
                         </div>
                       </div>
                     </div>
 
-                    <p className="text-white/60 text-sm mb-6 text-center">
-                      <span className="text-white font-medium">{newGameName}</span> wants to be your #{targetRank} favorite
+                    <p className="text-muted-foreground text-sm mb-7 text-center">
+                      <span className="text-foreground font-semibold">{newGameName}</span> wants to be your #{targetRank} favorite
                     </p>
 
                     <div className="space-y-3">
                       <button
                         onClick={handleReplace}
                         disabled={isPending}
-                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30 transition-colors disabled:opacity-50"
+                        className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium transition-all disabled:opacity-50"
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.15)',
+                          border: '1px solid rgba(239, 68, 68, 0.3)',
+                          color: '#fca5a5',
+                        }}
                       >
                         <Trash2 className="w-4 h-4" />
                         Replace (remove from favorites)
@@ -337,7 +345,7 @@ export function FavoriteConflictModal({
                         <button
                           onClick={() => setShowReassignPicker(true)}
                           disabled={isPending}
-                          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors disabled:opacity-50"
+                          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium text-foreground transition-all disabled:opacity-50 nav-glass nav-border nav-shadow"
                         >
                           <ArrowRight className="w-4 h-4" />
                           Move to another rank
@@ -347,7 +355,7 @@ export function FavoriteConflictModal({
                       <button
                         onClick={onClose}
                         disabled={isPending}
-                        className="w-full py-2.5 text-white/50 hover:text-white transition-colors"
+                        className="w-full py-3 text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
                       >
                         Cancel
                       </button>
@@ -361,30 +369,32 @@ export function FavoriteConflictModal({
                     exit={shouldReduce ? { opacity: 0 } : { opacity: 0, x: 20 }}
                     transition={slideTransition}
                   >
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between mb-6">
                       <button
                         onClick={() => setShowReassignPicker(false)}
-                        className="flex items-center gap-2 text-white/60 hover:text-white transition-colors"
+                        className="flex items-center gap-2 px-3 py-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
                       >
                         <ArrowRight className="w-4 h-4 rotate-180" />
-                        Back
+                        <span className="font-medium">Back</span>
                       </button>
                       <button
                         onClick={onClose}
-                        className="p-2 -mr-2 text-white/40 hover:text-white transition-colors rounded-lg hover:bg-white/10"
+                        className="p-2.5 -mr-2 text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-secondary/50"
                       >
                         <X className="h-5 w-5" />
                       </button>
                     </div>
 
-                    <div className="flex items-center gap-2 mb-4">
-                      <Trophy className="h-5 w-5 text-amber-400" />
-                      <span className="font-medium text-white">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-amber-400/10 border border-amber-400/20">
+                        <Trophy className="h-5 w-5 text-amber-400" />
+                      </div>
+                      <span className="font-semibold text-lg text-foreground">
                         Pick a new rank for {conflictingGame.gameName}
                       </span>
                     </div>
 
-                    <div className="flex gap-2 justify-center">
+                    <div className="flex gap-2.5 justify-center mb-4">
                       {Array.from({ length: 10 }, (_, i) => i + 1).map((rank) => {
                         const isAvailable = availableRanks.includes(rank);
                         const isTarget = rank === targetRank;
@@ -396,14 +406,18 @@ export function FavoriteConflictModal({
                             onClick={() => isAvailable && handleReassign(rank)}
                             disabled={!isAvailable || isPending}
                             className={`
-                              w-10 h-10 rounded-lg font-bold text-sm
+                              w-11 h-11 rounded-xl font-bold text-base
                               transition-all
                               ${isAvailable
-                                ? `bg-gradient-to-br ${RANK_COLORS[rank - 1]} text-white shadow-md hover:shadow-lg`
-                                : 'bg-white/5 text-white/20 cursor-not-allowed'
+                                ? `bg-linear-to-br ${RANK_GRADIENT_CLASSES[rank - 1]} text-white shadow-md hover:shadow-xl`
+                                : 'text-muted-foreground/30 cursor-not-allowed'
                               }
-                              ${isTarget ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-black/50' : ''}
+                              ${isTarget ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-background' : ''}
                             `}
+                            style={!isAvailable ? {
+                              background: 'linear-gradient(180deg, var(--glass-card-from) 0%, var(--glass-card-to) 100%)',
+                              border: '1px solid var(--nav-border-color)',
+                            } : undefined}
                           >
                             {rank}
                           </motion.button>
@@ -411,8 +425,8 @@ export function FavoriteConflictModal({
                       })}
                     </div>
 
-                    <p className="text-white/40 text-xs text-center mt-4">
-                      Colored ranks are available. #{targetRank} is reserved for your new favorite.
+                    <p className="text-muted-foreground/70 text-xs text-center">
+                      #{targetRank} is reserved for your new favorite. Select an available rank.
                     </p>
                   </motion.div>
                 )}

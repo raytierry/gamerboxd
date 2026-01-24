@@ -12,7 +12,7 @@ jest.mock('@/lib/auth', () => ({
 
 jest.mock('@/lib/prisma', () => ({
   prisma: {
-    backlogGame: {
+    backlog_games: {
       findUnique: jest.fn(),
       findMany: jest.fn(),
       create: jest.fn(),
@@ -28,6 +28,16 @@ jest.mock('next/cache', () => ({
 
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+
+// Suppress console.error in tests
+const originalError = console.error;
+beforeAll(() => {
+  console.error = jest.fn();
+});
+
+afterAll(() => {
+  console.error = originalError;
+});
 
 const mockAuth = auth as jest.MockedFunction<typeof auth>;
 const mockPrisma = prisma as jest.Mocked<typeof prisma>;
@@ -67,13 +77,13 @@ describe('Backlog Actions', () => {
 
     it('should create new backlog entry when not exists', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.backlogGame.findUnique as jest.Mock).mockResolvedValueOnce(null as never);
-      (mockPrisma.backlogGame.create as jest.Mock).mockResolvedValueOnce(mockBacklogEntry);
+      (mockPrisma.backlog_games.findUnique as jest.Mock).mockResolvedValueOnce(null as never);
+      (mockPrisma.backlog_games.create as jest.Mock).mockResolvedValueOnce(mockBacklogEntry);
 
       const result = await addToBacklog(mockGameData);
 
       expect(result.success).toBe(true);
-      expect(mockPrisma.backlogGame.create).toHaveBeenCalledWith({
+      expect(mockPrisma.backlog_games.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           userId: 'user-1',
           gameId: 123,
@@ -84,8 +94,8 @@ describe('Backlog Actions', () => {
 
     it('should update existing entry when exists', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.backlogGame.findUnique as jest.Mock).mockResolvedValueOnce(mockBacklogEntry);
-      (mockPrisma.backlogGame.update as jest.Mock).mockResolvedValueOnce({
+      (mockPrisma.backlog_games.findUnique as jest.Mock).mockResolvedValueOnce(mockBacklogEntry);
+      (mockPrisma.backlog_games.update as jest.Mock).mockResolvedValueOnce({
         ...mockBacklogEntry,
         status: 'PLAYING',
       });
@@ -93,7 +103,7 @@ describe('Backlog Actions', () => {
       const result = await addToBacklog(mockGameData, 'PLAYING');
 
       expect(result.success).toBe(true);
-      expect(mockPrisma.backlogGame.update).toHaveBeenCalledWith({
+      expect(mockPrisma.backlog_games.update).toHaveBeenCalledWith({
         where: { id: 'entry-1' },
         data: { status: 'PLAYING' },
       });
@@ -101,7 +111,7 @@ describe('Backlog Actions', () => {
 
     it('should handle database errors', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.backlogGame.findUnique as jest.Mock).mockRejectedValueOnce(new Error('DB Error'));
+      (mockPrisma.backlog_games.findUnique as jest.Mock).mockRejectedValueOnce(new Error('DB Error'));
 
       const result = await addToBacklog(mockGameData);
 
@@ -120,12 +130,12 @@ describe('Backlog Actions', () => {
 
     it('should delete backlog entry', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.backlogGame.delete as jest.Mock).mockResolvedValueOnce(mockBacklogEntry);
+      (mockPrisma.backlog_games.delete as jest.Mock).mockResolvedValueOnce(mockBacklogEntry);
 
       const result = await removeFromBacklog(123);
 
       expect(result).toEqual({ success: true });
-      expect(mockPrisma.backlogGame.delete).toHaveBeenCalledWith({
+      expect(mockPrisma.backlog_games.delete).toHaveBeenCalledWith({
         where: {
           userId_gameId: {
             userId: 'user-1',
@@ -137,7 +147,7 @@ describe('Backlog Actions', () => {
 
     it('should handle database errors', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.backlogGame.delete as jest.Mock).mockRejectedValueOnce(new Error('DB Error'));
+      (mockPrisma.backlog_games.delete as jest.Mock).mockRejectedValueOnce(new Error('DB Error'));
 
       const result = await removeFromBacklog(123);
 
@@ -156,7 +166,7 @@ describe('Backlog Actions', () => {
 
     it('should update status', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.backlogGame.update as jest.Mock).mockResolvedValueOnce({
+      (mockPrisma.backlog_games.update as jest.Mock).mockResolvedValueOnce({
         ...mockBacklogEntry,
         status: 'COMPLETED',
       });
@@ -164,7 +174,7 @@ describe('Backlog Actions', () => {
       const result = await updateBacklogStatus(123, 'COMPLETED');
 
       expect(result.success).toBe(true);
-      expect(mockPrisma.backlogGame.update).toHaveBeenCalledWith({
+      expect(mockPrisma.backlog_games.update).toHaveBeenCalledWith({
         where: {
           userId_gameId: {
             userId: 'user-1',
@@ -187,7 +197,7 @@ describe('Backlog Actions', () => {
 
     it('should return backlog entry when exists', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.backlogGame.findUnique as jest.Mock).mockResolvedValueOnce(mockBacklogEntry);
+      (mockPrisma.backlog_games.findUnique as jest.Mock).mockResolvedValueOnce(mockBacklogEntry);
 
       const result = await getBacklogStatus(123);
 
@@ -196,7 +206,7 @@ describe('Backlog Actions', () => {
 
     it('should return null on error', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.backlogGame.findUnique as jest.Mock).mockRejectedValueOnce(new Error('DB Error'));
+      (mockPrisma.backlog_games.findUnique as jest.Mock).mockRejectedValueOnce(new Error('DB Error'));
 
       const result = await getBacklogStatus(123);
 
@@ -215,12 +225,12 @@ describe('Backlog Actions', () => {
 
     it('should return user backlog', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.backlogGame.findMany as jest.Mock).mockResolvedValueOnce([mockBacklogEntry]);
+      (mockPrisma.backlog_games.findMany as jest.Mock).mockResolvedValueOnce([mockBacklogEntry]);
 
       const result = await getUserBacklog();
 
       expect(result).toEqual([mockBacklogEntry]);
-      expect(mockPrisma.backlogGame.findMany).toHaveBeenCalledWith({
+      expect(mockPrisma.backlog_games.findMany).toHaveBeenCalledWith({
         where: { userId: 'user-1' },
         orderBy: { updatedAt: 'desc' },
       });
@@ -228,7 +238,7 @@ describe('Backlog Actions', () => {
 
     it('should return empty array on error', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.backlogGame.findMany as jest.Mock).mockRejectedValueOnce(new Error('DB Error'));
+      (mockPrisma.backlog_games.findMany as jest.Mock).mockRejectedValueOnce(new Error('DB Error'));
 
       const result = await getUserBacklog();
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Heart, Trophy, X, Loader2, ChevronDown } from 'lucide-react';
+import { Trophy, X, Loader2, ChevronDown } from 'lucide-react';
 import {
   useFavoriteStatus,
   useAddToFavorites,
@@ -12,6 +12,7 @@ import {
 } from '@/hooks/use-favorites';
 import { motion, AnimatePresence, useDragControls, useReducedMotion, PanInfo } from 'motion/react';
 import { FavoriteConflictModal } from '@/components/FavoriteConflictModal';
+import { RANK_GRADIENT_CLASSES, RANK_CSS_COLORS } from '@/constants';
 
 interface FavoriteButtonProps {
   gameId: number;
@@ -19,19 +20,6 @@ interface FavoriteButtonProps {
   gameName: string;
   gameImage: string | null;
 }
-
-const RANK_COLORS = [
-  'from-amber-400 to-yellow-500',
-  'from-slate-300 to-slate-400',
-  'from-amber-600 to-amber-700',
-  'from-indigo-400 to-indigo-500',
-  'from-purple-400 to-purple-500',
-  'from-pink-400 to-pink-500',
-  'from-rose-400 to-rose-500',
-  'from-orange-400 to-orange-500',
-  'from-teal-400 to-teal-500',
-  'from-cyan-400 to-cyan-500',
-];
 
 export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: FavoriteButtonProps) {
   const [showRankPicker, setShowRankPicker] = useState(false);
@@ -116,11 +104,14 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
 
   if (isLoading) {
     return (
-      <div className="h-11 w-40 rounded-full animate-pulse border border-white/10 glass-button" />
+      <div className="h-11 w-40 rounded-full animate-pulse border border-border glass-button" />
     );
   }
 
-  const buttonText = isFavorite ? `#${currentRank} Favorite` : 'Favorite';
+  const buttonText = isFavorite ? `#${currentRank} Ranking` : 'Add to ranking';
+
+  // Get the rank-specific colors
+  const rankColors = currentRank ? RANK_CSS_COLORS[currentRank - 1] : null;
 
   return (
     <>
@@ -128,13 +119,24 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
         <button
           onClick={() => setShowRankPicker(!showRankPicker)}
           disabled={isPending}
-          className={`flex items-center gap-2 h-11 px-5 rounded-full font-medium transition-all duration-200 border border-white/10 min-w-[150px] text-white/80 hover:text-white hover:bg-white/10 ${isFavorite ? '' : 'glass-button'}`}
-          style={isFavorite ? {
-            background: 'linear-gradient(180deg, rgba(239, 68, 68, 0.2) 0%, rgba(185, 28, 28, 0.3) 100%)',
-            backdropFilter: 'blur(12px)',
-          } : undefined}
+          className={`flex items-center justify-center gap-2 h-11 px-4 rounded-xl font-medium transition-all duration-200 w-full ${
+            isFavorite
+              ? 'text-white'
+              : 'nav-glass text-foreground hover:bg-secondary/50 border border-border/50'
+          }`}
+          style={
+            isFavorite && rankColors
+              ? {
+                  background: `linear-gradient(to right, ${rankColors.from}, ${rankColors.to})`,
+                  boxShadow: `0 4px 20px ${rankColors.shadow}, var(--nav-shadow)`,
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                }
+              : {
+                  boxShadow: 'var(--nav-shadow)',
+                }
+          }
         >
-          <span className="relative w-4 h-4 flex items-center justify-center">
+          <span className="relative w-5 h-5 flex items-center justify-center">
             <motion.span
               key={isPending ? 'loading' : 'icon'}
               initial={shouldReduce ? false : { opacity: 0, scale: 0.8 }}
@@ -146,26 +148,26 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
               {isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <Heart className={`w-4 h-4 ${isFavorite ? 'fill-red-400 text-red-400' : ''}`} />
+                <Trophy className={`w-4 h-4 ${isFavorite ? 'fill-white text-white' : ''}`} />
               )}
             </motion.span>
           </span>
-          <span className="flex-1 text-left text-sm">{buttonText}</span>
-          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showRankPicker ? 'rotate-180' : ''}`} />
+          <span className="flex-1 text-center text-sm whitespace-nowrap overflow-hidden text-ellipsis">{buttonText}</span>
+          <ChevronDown className={`w-4 h-4 transition-transform duration-200 shrink-0 ${showRankPicker ? 'rotate-180' : ''}`} />
         </button>
 
         <AnimatePresence>
           {showRankPicker && (
             <>
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={fadeTransition}
-                className="fixed inset-0 z-40 bg-black/50 sm:bg-transparent" 
-                onClick={() => setShowRankPicker(false)} 
+                className="fixed inset-0 z-40 bg-black/50 dark:bg-black/50 sm:bg-transparent"
+                onClick={() => setShowRankPicker(false)}
               />
-              
+
                 <motion.div
                 initial={shouldReduce ? { opacity: 0 } : { y: '100%' }}
                 animate={shouldReduce ? { opacity: 1 } : { y: 0 }}
@@ -177,21 +179,21 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
                 dragConstraints={{ top: 0, bottom: 0 }}
                 dragElastic={{ top: 0, bottom: 0.5 }}
                 onDragEnd={handleDragEnd}
-                className="fixed inset-x-0 bottom-0 p-4 pb-8 rounded-t-3xl z-50 sm:hidden border-t border-white/10 touch-none glass-modal"
+                className="fixed inset-x-0 bottom-0 p-4 pb-8 rounded-t-3xl z-50 sm:hidden border-t border-border touch-none glass-modal"
               >
-                <div 
-                  className="w-12 h-1 bg-white/30 rounded-full mx-auto mb-4 cursor-grab active:cursor-grabbing"
+                <div
+                  className="w-12 h-1 bg-muted-foreground/30 rounded-full mx-auto mb-4 cursor-grab active:cursor-grabbing"
                   onPointerDown={(e) => dragControls.start(e)}
                 />
-                
+
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <Trophy className="h-5 w-5 text-amber-400" />
-                    <span className="font-medium text-white">Pick your rank</span>
+                    <span className="font-medium text-foreground">Pick your rank</span>
                   </div>
                   <button
                     onClick={() => setShowRankPicker(false)}
-                    className="p-2 text-white/40 hover:text-white transition-colors"
+                    className="p-2 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -209,11 +211,11 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
                         disabled={isPending}
                         className={`
                           h-14 rounded-xl font-bold text-lg
-                          bg-gradient-to-br ${RANK_COLORS[rank - 1]}
+                          bg-gradient-to-br ${RANK_GRADIENT_CLASSES[rank - 1]}
                           text-white shadow-lg
                           active:brightness-90 transition-all
                           disabled:opacity-50
-                          ${isCurrent ? 'ring-2 ring-white ring-offset-2 ring-offset-black/50' : ''}
+                          ${isCurrent ? 'ring-2 ring-foreground ring-offset-2 ring-offset-background' : ''}
                           ${isUsed && !isCurrent ? 'opacity-70' : ''}
                         `}
                       >
@@ -239,11 +241,11 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
                 animate={shouldReduce ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
                 exit={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.96 }}
                 transition={fadeTransition}
-                className="hidden sm:block absolute top-full left-0 mt-2 p-3 rounded-2xl shadow-xl z-50 border border-white/10 glass-modal"
+                className="hidden sm:block absolute top-full left-0 mt-2 p-3 rounded-2xl shadow-xl z-50 border border-border glass-modal"
               >
                 <div className="flex items-center gap-2 mb-3 px-1">
                   <Trophy className="h-4 w-4 text-amber-400" />
-                  <span className="text-sm font-medium text-white">Pick your rank</span>
+                  <span className="text-sm font-medium text-foreground">Pick your rank</span>
                 </div>
 
                 <div className="flex gap-1.5">
@@ -259,11 +261,11 @@ export function FavoriteButton({ gameId, gameSlug, gameName, gameImage }: Favori
                         disabled={isPending}
                         className={`
                           w-9 h-9 rounded-lg font-bold text-sm
-                          bg-gradient-to-br ${RANK_COLORS[rank - 1]}
+                          bg-gradient-to-br ${RANK_GRADIENT_CLASSES[rank - 1]}
                           text-white shadow-md
                           hover:shadow-lg transition-shadow
                           disabled:opacity-50
-                          ${isCurrent ? 'ring-2 ring-white ring-offset-1 ring-offset-black/50' : ''}
+                          ${isCurrent ? 'ring-2 ring-foreground ring-offset-1 ring-offset-background' : ''}
                           ${isUsed && !isCurrent ? 'opacity-70' : ''}
                         `}
                       >

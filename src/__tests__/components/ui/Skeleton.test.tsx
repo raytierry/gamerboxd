@@ -8,10 +8,10 @@ describe('Skeleton', () => {
     expect(screen.getByTestId('skeleton').tagName).toBe('DIV');
   });
 
-  it('should have default animation class', () => {
+  it('should have default shimmer animation class', () => {
     render(<Skeleton data-testid="skeleton" />);
 
-    expect(screen.getByTestId('skeleton')).toHaveClass('animate-pulse');
+    expect(screen.getByTestId('skeleton')).toHaveClass('animate-shimmer');
   });
 
   it('should have rounded-lg class', () => {
@@ -20,17 +20,18 @@ describe('Skeleton', () => {
     expect(screen.getByTestId('skeleton')).toHaveClass('rounded-lg');
   });
 
-  it('should have bg-secondary class', () => {
-    render(<Skeleton data-testid="skeleton" />);
+  it('should have pulse animation when variant is pulse', () => {
+    render(<Skeleton data-testid="skeleton" variant="pulse" />);
 
-    expect(screen.getByTestId('skeleton')).toHaveClass('bg-secondary');
+    expect(screen.getByTestId('skeleton')).toHaveClass('animate-pulse');
+    expect(screen.getByTestId('skeleton')).toHaveClass('from-secondary');
   });
 
   it('should merge custom className', () => {
     render(<Skeleton data-testid="skeleton" className="w-full h-10" />);
 
     const skeleton = screen.getByTestId('skeleton');
-    expect(skeleton).toHaveClass('animate-pulse');
+    expect(skeleton).toHaveClass('animate-shimmer');
     expect(skeleton).toHaveClass('w-full');
     expect(skeleton).toHaveClass('h-10');
   });

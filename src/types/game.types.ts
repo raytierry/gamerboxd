@@ -1,18 +1,76 @@
 /**
  * Types relacionados a jogos
- * Baseados na RAWG API
+ * Baseados na IGDB API
  */
 
-// Resposta da busca de jogos da RAWG
-export interface RAWGGame {
+// Resposta da busca de jogos da IGDB
+export interface IGDBGame {
   id: number;
   slug: string;
   name: string;
+  first_release_date?: number; // Unix timestamp
+  cover?: {
+    image_id: string;
+  };
+  artworks?: {
+    image_id: string;
+  }[];
+  rating?: number;
+  aggregated_rating?: number;
+  screenshots?: {
+    image_id: string;
+  }[];
+  platforms?: {
+    name: string;
+  }[];
+  genres?: {
+    name: string;
+  }[];
+  summary?: string;
+}
+
+// Resposta paginada da IGDB
+export interface IGDBResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
+// Detalhes completos de um jogo
+export interface IGDBGameDetails extends IGDBGame {
+  storyline?: string;
+  url?: string;
+  involved_companies?: {
+    company: {
+      name: string;
+    };
+    developer: boolean;
+    publisher: boolean;
+  }[];
+  age_ratings?: {
+    rating: number;
+    category: number;
+  }[];
+}
+
+// Versão simplificada para uso interno (cache no banco)
+export interface Game {
+  id: number;
+  slug: string;
+  name: string;
+  backgroundImage: string | null;
+  rating: number | null;
   released: string | null;
+}
+
+// Tipo para jogos adaptados (formato legado com campos IGDB)
+export interface AdaptedGame extends Omit<IGDBGame, 'platforms' | 'genres'> {
   background_image: string | null;
-  rating: number;
+  released: string | null;
   metacritic: number | null;
   playtime: number;
+  description_raw?: string;
   platforms: {
     platform: {
       id: number;
@@ -30,42 +88,27 @@ export interface RAWGGame {
     name: string;
     slug: string;
   }[];
-  stores: {
-    store: {
-      id: number;
-      name: string;
-      slug: string;
-    };
-  }[];
   short_screenshots: {
-    id: number;
+    id: string | number;
     image: string;
   }[];
+  stores: unknown[];
 }
 
-// Resposta paginada da RAWG
-export interface RAWGResponse<T> {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: T[];
-}
-
-// Detalhes completos de um jogo (endpoint /games/{slug})
-export interface RAWGGameDetails extends RAWGGame {
+export interface AdaptedGameDetails extends AdaptedGame {
   description: string;
   description_raw: string;
   website: string;
   reddit_url: string;
   developers: {
-    id: number;
+    id?: number;
     name: string;
-    slug: string;
+    slug?: string;
   }[];
   publishers: {
-    id: number;
+    id?: number;
     name: string;
-    slug: string;
+    slug?: string;
   }[];
   esrb_rating: {
     id: number;
@@ -74,12 +117,7 @@ export interface RAWGGameDetails extends RAWGGame {
   } | null;
 }
 
-// Versão simplificada para uso interno (cache no banco)
-export interface Game {
-  id: number;
-  slug: string;
-  name: string;
-  backgroundImage: string | null;
-  metacritic: number | null;
-  released: string | null;
-}
+// Tipos legados para compatibilidade (serão removidos gradualmente)
+export type RAWGGame = AdaptedGame;
+export type RAWGResponse<T> = IGDBResponse<T>;
+export type RAWGGameDetails = AdaptedGameDetails;

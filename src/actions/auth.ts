@@ -16,7 +16,7 @@ export async function register(
   password: string
 ): Promise<AuthResult> {
   try {
-    const existingUser = await prisma.user.findFirst({
+    const existingUser = await prisma.users.findFirst({
       where: {
         OR: [{ email }, { username }],
       },
@@ -31,7 +31,7 @@ export async function register(
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    await prisma.user.create({
+    await prisma.users.create({
       data: {
         email,
         username,

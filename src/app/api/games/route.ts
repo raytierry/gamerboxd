@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { searchGames } from '@/lib/rawg';
+import { searchGames } from '@/lib/igdb';
+import { adaptIGDBGame } from '@/lib/igdb-adapter';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -8,7 +9,7 @@ export async function GET(request: NextRequest) {
   const pageSize = Number(searchParams.get('pageSize')) || 20;
   const ordering = searchParams.get('ordering') || undefined;
   const dates = searchParams.get('dates') || undefined;
-  const metacritic = searchParams.get('metacritic') || undefined;
+  const minRating = searchParams.get('minRating') ? Number(searchParams.get('minRating')) : undefined;
 
   try {
     const data = await searchGames({
@@ -17,13 +18,28 @@ export async function GET(request: NextRequest) {
       pageSize,
       ordering,
       dates,
-      metacritic,
+      minRating,
     });
-    return NextResponse.json(data);
+
+    // Adapta os resultados para o formato legado
+    const adaptedData = {
+      ...data,
+      results: data.results.map(game => adaptIGDBGame(game)),
+    };
+
+    return NextResponse.json(adaptedData);
   } catch (error) {
     console.error('Error fetching games:', error);
+    console.error('Request params:', { query, page, pageSize, ordering, dates, minRating });
+
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch games';
+
     return NextResponse.json(
-      { error: 'Failed to fetch games' },
+      {
+        error: 'Failed to fetch games',
+        details: errorMessage,
+        params: { query, page, pageSize }
+      },
       { status: 500 }
     );
   }

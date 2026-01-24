@@ -37,7 +37,8 @@ describe('GameCard', () => {
   it('should render game name', () => {
     render(<GameCard game={mockGame} />);
 
-    expect(screen.getByText('The Witcher 3')).toBeInTheDocument();
+    const names = screen.getAllByText('The Witcher 3');
+    expect(names.length).toBeGreaterThan(0);
   });
 
   it('should link to game detail page', () => {

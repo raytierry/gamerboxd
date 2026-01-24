@@ -13,7 +13,7 @@ jest.mock('@/lib/auth', () => ({
 
 jest.mock('@/lib/prisma', () => ({
   prisma: {
-    favoriteGame: {
+    favorite_games: {
       findUnique: jest.fn(),
       findMany: jest.fn(),
       create: jest.fn(),
@@ -30,6 +30,16 @@ jest.mock('next/cache', () => ({
 
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+
+// Suppress console.error in tests
+const originalError = console.error;
+beforeAll(() => {
+  console.error = jest.fn();
+});
+
+afterAll(() => {
+  console.error = originalError;
+});
 
 const mockAuth = auth as jest.MockedFunction<typeof auth>;
 const mockPrisma = prisma as jest.Mocked<typeof prisma>;
@@ -102,7 +112,7 @@ describe('Favorites Actions', () => {
 
     it('should return no conflict when rank is free', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.favoriteGame.findUnique as jest.Mock).mockResolvedValueOnce(null as never);
+      (mockPrisma.favorite_games.findUnique as jest.Mock).mockResolvedValueOnce(null as never);
 
       const result = await checkRankConflict(1);
 
@@ -111,7 +121,7 @@ describe('Favorites Actions', () => {
 
     it('should return conflict when rank is taken by another game', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.favoriteGame.findUnique as jest.Mock).mockResolvedValueOnce(mockFavoriteEntry);
+      (mockPrisma.favorite_games.findUnique as jest.Mock).mockResolvedValueOnce(mockFavoriteEntry);
 
       const result = await checkRankConflict(1, 999);
 
@@ -124,7 +134,7 @@ describe('Favorites Actions', () => {
 
     it('should return no conflict when rank is taken by same game', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.favoriteGame.findUnique as jest.Mock).mockResolvedValueOnce(mockFavoriteEntry);
+      (mockPrisma.favorite_games.findUnique as jest.Mock).mockResolvedValueOnce(mockFavoriteEntry);
 
       const result = await checkRankConflict(1, 123);
 
@@ -133,7 +143,7 @@ describe('Favorites Actions', () => {
 
     it('should return no conflict on database error', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.favoriteGame.findUnique as jest.Mock).mockRejectedValueOnce(new Error('DB Error'));
+      (mockPrisma.favorite_games.findUnique as jest.Mock).mockRejectedValueOnce(new Error('DB Error'));
 
       const result = await checkRankConflict(1);
 
@@ -152,7 +162,7 @@ describe('Favorites Actions', () => {
 
     it('should return used ranks with gameIds', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.favoriteGame.findMany as jest.Mock).mockResolvedValueOnce([
+      (mockPrisma.favorite_games.findMany as jest.Mock).mockResolvedValueOnce([
         { rank: 1, gameId: 123 },
         { rank: 3, gameId: 456 },
         { rank: 5, gameId: 789 },
@@ -169,7 +179,7 @@ describe('Favorites Actions', () => {
 
     it('should return empty array on database error', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.favoriteGame.findMany as jest.Mock).mockRejectedValueOnce(new Error('DB Error'));
+      (mockPrisma.favorite_games.findMany as jest.Mock).mockRejectedValueOnce(new Error('DB Error'));
 
       const result = await getUsedRanks();
 
@@ -204,7 +214,7 @@ describe('Favorites Actions', () => {
 
     it('should return success when same game same rank (no-op)', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.favoriteGame.findUnique as jest.Mock)
+      (mockPrisma.favorite_games.findUnique as jest.Mock)
         .mockResolvedValueOnce(mockFavoriteEntry)
         .mockResolvedValueOnce(null as never);
 
@@ -217,7 +227,7 @@ describe('Favorites Actions', () => {
       const conflictingGame = { ...mockFavoriteEntry, gameId: 456, gameName: 'Other Game' };
       
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.favoriteGame.findUnique as jest.Mock)
+      (mockPrisma.favorite_games.findUnique as jest.Mock)
         .mockResolvedValueOnce(conflictingGame)
         .mockResolvedValueOnce(null as never);
 
@@ -232,15 +242,15 @@ describe('Favorites Actions', () => {
 
     it('should create new favorite when rank is free', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.favoriteGame.findUnique as jest.Mock)
+      (mockPrisma.favorite_games.findUnique as jest.Mock)
         .mockResolvedValueOnce(null as never)
         .mockResolvedValueOnce(null as never);
-      (mockPrisma.favoriteGame.create as jest.Mock).mockResolvedValueOnce(mockFavoriteEntry);
+      (mockPrisma.favorite_games.create as jest.Mock).mockResolvedValueOnce(mockFavoriteEntry);
 
       const result = await addToFavorites(mockGameData, 1);
 
       expect(result).toEqual({ success: true });
-      expect(mockPrisma.favoriteGame.create).toHaveBeenCalledWith({
+      expect(mockPrisma.favorite_games.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           gameId: 123,
           rank: 1,
@@ -250,15 +260,15 @@ describe('Favorites Actions', () => {
 
     it('should update existing game rank when rank is free', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.favoriteGame.findUnique as jest.Mock)
+      (mockPrisma.favorite_games.findUnique as jest.Mock)
         .mockResolvedValueOnce(null as never)
         .mockResolvedValueOnce(mockFavoriteEntry);
-      (mockPrisma.favoriteGame.update as jest.Mock).mockResolvedValueOnce({ ...mockFavoriteEntry, rank: 5 });
+      (mockPrisma.favorite_games.update as jest.Mock).mockResolvedValueOnce({ ...mockFavoriteEntry, rank: 5 });
 
       const result = await addToFavorites(mockGameData, 5);
 
       expect(result).toEqual({ success: true });
-      expect(mockPrisma.favoriteGame.update).toHaveBeenCalledWith({
+      expect(mockPrisma.favorite_games.update).toHaveBeenCalledWith({
         where: { id: 'fav-1' },
         data: { rank: 5 },
       });
@@ -269,7 +279,7 @@ describe('Favorites Actions', () => {
         const conflictingGame = { ...mockFavoriteEntry, id: 'conflict-id', gameId: 999, gameName: 'Conflicting Game' };
         const mockTransaction = jest.fn().mockImplementation(async (callback) => {
           const tx = {
-            favoriteGame: {
+            favorite_games: {
               delete: jest.fn(),
               create: jest.fn(),
               update: jest.fn(),
@@ -279,7 +289,7 @@ describe('Favorites Actions', () => {
         });
 
         mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-        (mockPrisma.favoriteGame.findUnique as jest.Mock)
+        (mockPrisma.favorite_games.findUnique as jest.Mock)
           .mockResolvedValueOnce(conflictingGame)
           .mockResolvedValueOnce(null as never);
         (mockPrisma.$transaction as jest.Mock).mockImplementation(mockTransaction);
@@ -295,7 +305,7 @@ describe('Favorites Actions', () => {
         const currentEntry = { ...mockFavoriteEntry, id: 'current-id', rank: 5 };
         const mockTransaction = jest.fn().mockImplementation(async (callback) => {
           const tx = {
-            favoriteGame: {
+            favorite_games: {
               delete: jest.fn(),
               create: jest.fn(),
               update: jest.fn(),
@@ -305,7 +315,7 @@ describe('Favorites Actions', () => {
         });
 
         mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-        (mockPrisma.favoriteGame.findUnique as jest.Mock)
+        (mockPrisma.favorite_games.findUnique as jest.Mock)
           .mockResolvedValueOnce(conflictingGame)
           .mockResolvedValueOnce(currentEntry);
         (mockPrisma.$transaction as jest.Mock).mockImplementation(mockTransaction);
@@ -322,7 +332,7 @@ describe('Favorites Actions', () => {
         const conflictingGame = { ...mockFavoriteEntry, id: 'conflict-id', gameId: 999 };
 
         mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-        (mockPrisma.favoriteGame.findUnique as jest.Mock)
+        (mockPrisma.favorite_games.findUnique as jest.Mock)
           .mockResolvedValueOnce(conflictingGame)
           .mockResolvedValueOnce(null as never);
 
@@ -335,7 +345,7 @@ describe('Favorites Actions', () => {
         const conflictingGame = { ...mockFavoriteEntry, id: 'conflict-id', gameId: 999 };
 
         mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-        (mockPrisma.favoriteGame.findUnique as jest.Mock)
+        (mockPrisma.favorite_games.findUnique as jest.Mock)
           .mockResolvedValueOnce(conflictingGame)
           .mockResolvedValueOnce(null as never);
 
@@ -349,7 +359,7 @@ describe('Favorites Actions', () => {
         const currentEntry = { ...mockFavoriteEntry, id: 'current-id', rank: 3 };
         const mockTransaction = jest.fn().mockImplementation(async (callback) => {
           const tx = {
-            favoriteGame: {
+            favorite_games: {
               update: jest.fn(),
             },
           };
@@ -357,7 +367,7 @@ describe('Favorites Actions', () => {
         });
 
         mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-        (mockPrisma.favoriteGame.findUnique as jest.Mock)
+        (mockPrisma.favorite_games.findUnique as jest.Mock)
           .mockResolvedValueOnce(conflictingGame)
           .mockResolvedValueOnce(currentEntry);
         (mockPrisma.$transaction as jest.Mock).mockImplementation(mockTransaction);
@@ -372,7 +382,7 @@ describe('Favorites Actions', () => {
         const conflictingGame = { ...mockFavoriteEntry, id: 'conflict-id', gameId: 999, rank: 1 };
         const mockTransaction = jest.fn().mockImplementation(async (callback) => {
           const tx = {
-            favoriteGame: {
+            favorite_games: {
               update: jest.fn(),
               create: jest.fn(),
             },
@@ -381,7 +391,7 @@ describe('Favorites Actions', () => {
         });
 
         mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-        (mockPrisma.favoriteGame.findUnique as jest.Mock)
+        (mockPrisma.favorite_games.findUnique as jest.Mock)
           .mockResolvedValueOnce(conflictingGame)
           .mockResolvedValueOnce(null as never);
         (mockPrisma.$transaction as jest.Mock).mockImplementation(mockTransaction);
@@ -395,7 +405,7 @@ describe('Favorites Actions', () => {
 
     it('should handle database errors gracefully', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.favoriteGame.findUnique as jest.Mock).mockRejectedValueOnce(new Error('DB Error'));
+      (mockPrisma.favorite_games.findUnique as jest.Mock).mockRejectedValueOnce(new Error('DB Error'));
 
       const result = await addToFavorites(mockGameData, 1);
 
@@ -414,12 +424,12 @@ describe('Favorites Actions', () => {
 
     it('should delete favorite', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.favoriteGame.delete as jest.Mock).mockResolvedValueOnce(mockFavoriteEntry);
+      (mockPrisma.favorite_games.delete as jest.Mock).mockResolvedValueOnce(mockFavoriteEntry);
 
       const result = await removeFromFavorites(123);
 
       expect(result).toEqual({ success: true });
-      expect(mockPrisma.favoriteGame.delete).toHaveBeenCalledWith({
+      expect(mockPrisma.favorite_games.delete).toHaveBeenCalledWith({
         where: {
           userId_gameId: {
             userId: 'user-1',
@@ -441,7 +451,7 @@ describe('Favorites Actions', () => {
 
     it('should return favorite entry when exists', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.favoriteGame.findUnique as jest.Mock).mockResolvedValueOnce(mockFavoriteEntry);
+      (mockPrisma.favorite_games.findUnique as jest.Mock).mockResolvedValueOnce(mockFavoriteEntry);
 
       const result = await getFavoriteStatus(123);
 
@@ -460,12 +470,12 @@ describe('Favorites Actions', () => {
 
     it('should return user favorites ordered by rank', async () => {
       mockAuth.mockResolvedValueOnce({ user: { id: 'user-1' } } as never);
-      (mockPrisma.favoriteGame.findMany as jest.Mock).mockResolvedValueOnce([mockFavoriteEntry]);
+      (mockPrisma.favorite_games.findMany as jest.Mock).mockResolvedValueOnce([mockFavoriteEntry]);
 
       const result = await getUserFavorites();
 
       expect(result).toEqual([mockFavoriteEntry]);
-      expect(mockPrisma.favoriteGame.findMany).toHaveBeenCalledWith({
+      expect(mockPrisma.favorite_games.findMany).toHaveBeenCalledWith({
         where: { userId: 'user-1' },
         orderBy: { rank: 'asc' },
       });

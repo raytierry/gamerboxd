@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { Search, X, Gamepad2, Star, Loader2 } from 'lucide-react';
 import { useSearchGames } from '@/hooks/use-games';
@@ -11,7 +11,9 @@ import { useDebounce } from '@/hooks/use-debounce';
 import PageWrapper from '@/components/PageWrapper';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { GAME_COVER_PLACEHOLDER } from '@/lib/image-placeholder';
 import type { RAWGGame } from '@/types/game.types';
+import { formatRating } from '@/lib/format';
 
 export default function SearchPage() {
   const { query, setQuery } = useSearch();
@@ -43,33 +45,28 @@ export default function SearchPage() {
 
   return (
     <PageWrapper className="min-h-screen pb-28 lg:pb-10">
-      {/* Hero Search Header */}
-      <div 
-        className="relative px-6 lg:px-10 pt-6 pb-8"
-        style={{
-          background: 'linear-gradient(180deg, rgba(45, 80, 75, 0.15) 0%, transparent 100%)',
-        }}
-      >
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-2xl lg:text-3xl font-bold text-white text-center mb-6">
+      {/* Search Header */}
+      <div className="px-6 lg:px-10 pt-6 pb-8 lg:pt-12 lg:pb-10">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-6 lg:mb-8">
             Search Games
           </h1>
-          
-          <div 
-            className="flex items-center gap-3 px-6 py-4 rounded-full border border-white/10 transition-all focus-within:border-white/20 focus-within:bg-white/[0.08]"
+
+          <div
+            className="flex items-center gap-3 h-14 lg:h-16 px-5 lg:px-6 rounded-full nav-glass transition-all"
             style={{
-              background: 'linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
-              backdropFilter: 'blur(12px)',
+              border: '1px solid var(--nav-border-color)',
+              boxShadow: 'var(--nav-shadow)',
             }}
           >
-            <Search className="w-5 h-5 text-white/40 shrink-0" />
+            <Search className="w-5 h-5 text-(--nav-icon) shrink-0" />
             <input
               ref={inputRef}
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by game name..."
-              className="flex-1 bg-transparent text-lg text-white placeholder:text-white/40 outline-none border-none min-w-0"
+              className="flex-1 bg-transparent text-base lg:text-lg text-foreground placeholder:text-muted-foreground/60 outline-none border-none min-w-0"
             />
             <AnimatePresence>
               {query && (
@@ -79,7 +76,7 @@ export default function SearchPage() {
                   exit={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
                   transition={fadeTransition}
                   onClick={() => setQuery('')}
-                  className="p-1.5 rounded-full bg-white/10 text-white/60 hover:text-white hover:bg-white/20 transition-colors"
+                  className="p-1.5 rounded-full text-(--nav-icon) hover:text-(--nav-icon-hover) hover:bg-(--nav-hover) transition-all"
                 >
                   <X className="w-4 h-4" />
                 </motion.button>
@@ -91,123 +88,117 @@ export default function SearchPage() {
 
       {/* Results Area */}
       <div className="px-6 lg:px-10">
-        <AnimatePresence mode="wait">
-          {!query ? (
-            <motion.div
-              key="empty"
-              initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 20 }}
-              animate={shouldReduce ? { opacity: 1 } : { opacity: 1, y: 0 }}
-              exit={shouldReduce ? { opacity: 0 } : { opacity: 0, y: -20 }}
-              transition={slideTransition}
-              className="text-center py-16"
-            >
-              <div 
-                className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center border border-white/10"
-                style={{
-                  background: 'linear-gradient(145deg, rgba(45, 80, 75, 0.2) 0%, rgba(25, 45, 45, 0.3) 100%)',
-                }}
+        <div className="max-w-7xl mx-auto">
+          <AnimatePresence mode="wait">
+            {!query ? (
+              <motion.div
+                key="empty"
+                initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 20 }}
+                animate={shouldReduce ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                exit={shouldReduce ? { opacity: 0 } : { opacity: 0, y: -20 }}
+                transition={slideTransition}
+                className="text-center py-16 lg:py-20"
               >
-                <Gamepad2 className="w-10 h-10 text-white/30" />
-              </div>
-              <p className="text-white/50 text-lg mb-2">Find your next favorite game</p>
-              <p className="text-white/30 text-sm">Search by title to explore thousands of games</p>
-            </motion.div>
-          ) : loadingSearch && searchGames.length === 0 ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={fadeTransition}
-            >
-              <p className="text-sm text-white/50 mb-6">Searching for &quot;{query}&quot;...</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                {Array.from({ length: 12 }).map((_, i) => (
-                  <motion.div
-                    key={i}
-                    initial={shouldReduce ? false : { opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={shouldReduce ? { duration: 0 } : { delay: i * 0.03 }}
-                    className="rounded-xl overflow-hidden bg-white/5"
-                  >
-                    <Skeleton className="aspect-[4/3] rounded-none" />
-                    <div className="p-3">
-                      <Skeleton className="h-4 w-full mb-1.5" />
-                      <Skeleton className="h-3 w-2/3" />
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          ) : searchGames.length === 0 && debouncedQuery ? (
-            <motion.div
-              key="no-results"
-              initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 20 }}
-              animate={shouldReduce ? { opacity: 1 } : { opacity: 1, y: 0 }}
-              exit={shouldReduce ? { opacity: 0 } : { opacity: 0, y: -20 }}
-              transition={slideTransition}
-              className="text-center py-16"
-            >
-              <div 
-                className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center border border-white/10"
-                style={{
-                  background: 'linear-gradient(145deg, rgba(45, 80, 75, 0.2) 0%, rgba(25, 45, 45, 0.3) 100%)',
-                }}
-              >
-                <Search className="w-10 h-10 text-white/30" />
-              </div>
-              <p className="text-white/50 text-lg mb-2">No games found</p>
-              <p className="text-white/30 text-sm">Try a different search term</p>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="results"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={fadeTransition}
-            >
-              <div className="flex items-center justify-between mb-6">
-                <p className="text-sm text-white/50">
-                  {searchResults?.pages[0]?.count?.toLocaleString() || 0} games found
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                {searchGames.map((game, i) => (
-                  <motion.div
-                    key={game.id}
-                    initial={shouldReduce ? false : { opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={shouldReduce ? { duration: 0 } : { delay: i * 0.02, duration: 0.3 }}
-                  >
-                    <SearchResultCard game={game} />
-                  </motion.div>
-                ))}
-              </div>
-
-              {hasNextPage && (
-                <div className="mt-12 text-center">
-                  <Button
-                    variant="outline"
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetchingNextPage}
-                    className="rounded-full px-8 bg-white/5 border-white/10 hover:bg-white/10"
-                  >
-                    {isFetchingNextPage ? 'Loading...' : 'Load more'}
-                  </Button>
+                <div className="w-20 h-20 lg:w-24 lg:h-24 mx-auto mb-5 rounded-full flex items-center justify-center border border-border bg-secondary/30">
+                  <Gamepad2 className="w-9 h-9 lg:w-11 lg:h-11 text-muted-foreground/40" />
                 </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <p className="text-foreground text-base lg:text-lg font-medium mb-2">Find your next favorite game</p>
+                <p className="text-muted-foreground text-sm">Search by title to explore thousands of games</p>
+              </motion.div>
+            ) : loadingSearch && searchGames.length === 0 ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={fadeTransition}
+              >
+                <p className="text-sm text-muted-foreground mb-6">Searching for &quot;{query}&quot;...</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6 pt-4">
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <motion.div
+                      key={i}
+                      initial={shouldReduce ? false : { opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={shouldReduce ? { duration: 0 } : { delay: i * 0.03 }}
+                    >
+                      <div
+                        className="rounded-2xl overflow-hidden"
+                        style={{
+                          border: '1px solid var(--nav-border-color)',
+                          boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)',
+                        }}
+                      >
+                        <Skeleton className="aspect-2/3 rounded-none" />
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            ) : searchGames.length === 0 && debouncedQuery ? (
+              <motion.div
+                key="no-results"
+                initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 20 }}
+                animate={shouldReduce ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                exit={shouldReduce ? { opacity: 0 } : { opacity: 0, y: -20 }}
+                transition={slideTransition}
+                className="text-center py-16 lg:py-20"
+              >
+                <div className="w-20 h-20 lg:w-24 lg:h-24 mx-auto mb-5 rounded-full flex items-center justify-center border border-border bg-secondary/30">
+                  <Search className="w-9 h-9 lg:w-11 lg:h-11 text-muted-foreground/50" />
+                </div>
+                <p className="text-foreground text-base lg:text-lg font-medium mb-2">No games found</p>
+                <p className="text-muted-foreground text-sm">Try a different search term</p>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="results"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={fadeTransition}
+              >
+                <div className="mb-6">
+                  <p className="text-sm text-muted-foreground">
+                    {searchResults?.pages[0]?.count?.toLocaleString() || 0} games found
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6 pt-4">
+                  {searchGames.map((game, i) => (
+                    <motion.div
+                      key={game.id}
+                      initial={shouldReduce ? false : { opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={shouldReduce ? { duration: 0 } : { delay: i * 0.02, duration: 0.3 }}
+                    >
+                      <SearchResultCard game={game} />
+                    </motion.div>
+                  ))}
+                </div>
+
+                {hasNextPage && (
+                  <div className="mt-10 text-center">
+                    <Button
+                      variant="outline"
+                      onClick={() => fetchNextPage()}
+                      disabled={isFetchingNextPage}
+                      className="rounded-2xl px-8"
+                    >
+                      {isFetchingNextPage ? 'Loading...' : 'Load more'}
+                    </Button>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </PageWrapper>
   );
 }
 
 function SearchResultCard({ game }: { game: RAWGGame }) {
-  const releaseYear = game.released ? new Date(game.released).getFullYear() : null;
   const shouldReduce = useReducedMotion();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -216,12 +207,17 @@ function SearchResultCard({ game }: { game: RAWGGame }) {
   };
 
   return (
-    <Link href={`/games/${game.slug}`} className="block" onClick={handleClick}>
+    <Link href={`/games/${game.slug}`} className="block group" onClick={handleClick}>
       <motion.div
-        className="group relative rounded-xl overflow-hidden glass-card"
+        className="relative rounded-2xl overflow-hidden"
+        style={{
+          border: '1px solid var(--nav-border-color)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)',
+        }}
         initial={false}
-        whileHover={shouldReduce ? undefined : { 
-          y: -6,
+        whileHover={shouldReduce ? undefined : {
+          y: -4,
+          boxShadow: '0 6px 20px rgba(0,0,0,0.25), 0 3px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.12)',
           transition: { type: 'spring', stiffness: 400, damping: 20 }
         }}
       >
@@ -236,26 +232,15 @@ function SearchResultCard({ game }: { game: RAWGGame }) {
           </motion.div>
         )}
 
-        {/* Shine effect overlay */}
-        <motion.div
-          className="absolute inset-0 z-10 pointer-events-none"
-          initial={{ x: '-100%', opacity: 0 }}
-          whileHover={shouldReduce ? undefined : { 
-            x: '100%', 
-            opacity: 1,
-            transition: { duration: 0.5, ease: 'easeInOut' }
-          }}
-          style={{
-            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
-          }}
-        />
-
-        <div className="relative aspect-[4/3] overflow-hidden">
+        <div className="relative aspect-2/3 overflow-hidden">
           {game.background_image ? (
             <Image
               src={game.background_image}
               alt={game.name}
               fill
+              loading="lazy"
+              placeholder="blur"
+              blurDataURL={GAME_COVER_PLACEHOLDER}
               className="object-cover"
               sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
             />
@@ -265,54 +250,69 @@ function SearchResultCard({ game }: { game: RAWGGame }) {
             </div>
           )}
 
+          {/* Rating badge - always visible on mobile and desktop */}
           {game.metacritic && (
-            <motion.div 
-              className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-bold text-white z-20"
-              style={{
-                background: game.metacritic >= 75 
-                  ? 'rgba(34, 197, 94, 0.9)' 
-                  : game.metacritic >= 50 
-                    ? 'rgba(234, 179, 8, 0.9)' 
-                    : 'rgba(239, 68, 68, 0.9)',
-              }}
-              whileHover={shouldReduce ? undefined : { scale: 1.1 }}
-            >
-              {game.metacritic}
-            </motion.div>
+            <div className="absolute top-2.5 right-2.5 z-20">
+              <div
+                className="px-2 py-0.5 rounded-lg text-[11px] font-bold text-white shadow-lg"
+                style={{
+                  background: game.metacritic >= 75
+                    ? 'rgba(34, 197, 94, 0.95)'
+                    : game.metacritic >= 50
+                      ? 'rgba(234, 179, 8, 0.95)'
+                      : 'rgba(239, 68, 68, 0.95)',
+                  backdropFilter: 'blur(8px)',
+                }}
+              >
+                {game.metacritic}
+              </div>
+            </div>
           )}
-        </div>
 
-        <div className="p-3">
-          <h3 className="font-medium text-white text-sm leading-tight line-clamp-2 mb-1.5">
-            {game.name}
-          </h3>
-
-          <div className="flex items-center gap-2">
-            {game.genres?.[0] && (
-              <span className="text-[10px] text-white/50">
-                {game.genres[0].name}
-              </span>
-            )}
-            {releaseYear && (
-              <>
-                <span className="text-white/20">·</span>
-                <span className="text-[10px] text-white/40">{releaseYear}</span>
-              </>
-            )}
-            {game.rating > 0 && (
-              <>
-                <span className="text-white/20">·</span>
-                <div className="flex items-center gap-0.5">
-                  <Star className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />
-                  <span className="text-[10px] text-white/50">
-                    {game.rating.toFixed(1)}
+          {/* Desktop hover card with details */}
+          <div className="hidden lg:block absolute bottom-2.5 left-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+            <div
+              className="p-3 rounded-xl"
+              style={{
+                background: 'rgba(0, 0, 0, 0.85)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+              }}
+            >
+              <h3 className="font-bold text-white text-sm leading-snug mb-2 line-clamp-2">
+                {game.name}
+              </h3>
+              <div className="flex items-center gap-2 flex-wrap">
+                {game.rating && game.rating > 0 && (
+                  <div className="flex items-center gap-1 text-xs text-white/90">
+                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                    <span className="font-medium">{formatRating(game.rating)}</span>
+                  </div>
+                )}
+                {game.released && (
+                  <span className="text-xs text-white/60">
+                    {new Date(game.released).getFullYear()}
                   </span>
-                </div>
-              </>
-            )}
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </motion.div>
+
+      {/* Mobile title below card */}
+      <div className="lg:hidden mt-2 px-1">
+        <h3 className="font-semibold text-foreground text-sm leading-snug line-clamp-2">
+          {game.name}
+        </h3>
+        {game.rating && game.rating > 0 && (
+          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+            <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
+            <span>{formatRating(game.rating)}</span>
+          </div>
+        )}
+      </div>
     </Link>
   );
 }

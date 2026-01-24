@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion, useReducedMotion } from 'motion/react';
 import { Loader2, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { GAME_COVER_PLACEHOLDER } from '@/lib/image-placeholder';
 import type { RAWGGame } from '@/types/game.types';
 import { formatRating } from '@/lib/format';
 
@@ -54,6 +55,8 @@ export default function GameCard({ game }: GameCardProps) {
               alt={game.name}
               fill
               loading="lazy"
+              placeholder="blur"
+              blurDataURL={GAME_COVER_PLACEHOLDER}
               className="object-cover"
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
             />

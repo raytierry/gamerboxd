@@ -24,6 +24,10 @@ export function parseReleaseDate(dateString?: string): number | undefined {
 
 /**
  * Obtém URL da imagem de capa
+ * Sizes from IGDB:
+ * - cover_small: 90x128
+ * - cover_big: 264x374
+ * - cover_big_2x: 528x748 (retina quality)
  */
 export function getGameCoverUrl(game: IGDBGame | IGDBGameDetails, size: 'small' | 'medium' | 'big' = 'big'): string | null {
   if (!game.cover?.image_id) return null;
@@ -31,7 +35,7 @@ export function getGameCoverUrl(game: IGDBGame | IGDBGameDetails, size: 'small' 
   const sizeMap = {
     small: 'cover_small',
     medium: 'cover_big',
-    big: 'cover_big',
+    big: 'cover_big_2x', // Use 2x for better quality on modern displays
   } as const;
 
   return getImageUrl(game.cover.image_id, sizeMap[size]);
@@ -89,9 +93,9 @@ export function adaptIGDBGame(game: IGDBGame) {
     description_raw: game.summary,
 
     // Adapta estrutura de platforms
-    platforms: game.platforms?.map(p => ({
+    platforms: game.platforms?.map((p, index) => ({
       platform: {
-        id: 0,
+        id: index + 1,
         name: p.name,
         slug: p.name.toLowerCase().replace(/\s+/g, '-'),
       }
@@ -99,7 +103,7 @@ export function adaptIGDBGame(game: IGDBGame) {
 
     // Adapta estrutura de genres
     genres: game.genres?.map((g, index) => ({
-      id: index,
+      id: index + 1,
       name: g.name,
       slug: g.name.toLowerCase().replace(/\s+/g, '-'),
     })) || [],

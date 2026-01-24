@@ -20,7 +20,7 @@ export async function addToBacklog(game: GameData, status: BacklogStatus = 'WANT
   }
 
   try {
-    const existing = await prisma.backlogGame.findUnique({
+    const existing = await prisma.backlog_games.findUnique({
       where: {
         userId_gameId: {
           userId: session.user.id,
@@ -30,7 +30,7 @@ export async function addToBacklog(game: GameData, status: BacklogStatus = 'WANT
     });
 
     if (existing) {
-      const updated = await prisma.backlogGame.update({
+      const updated = await prisma.backlog_games.update({
         where: { id: existing.id },
         data: { status },
       });
@@ -38,7 +38,7 @@ export async function addToBacklog(game: GameData, status: BacklogStatus = 'WANT
       return { success: true, data: updated };
     }
 
-    const created = await prisma.backlogGame.create({
+    const created = await prisma.backlog_games.create({
       data: {
         userId: session.user.id,
         gameId: game.gameId,
@@ -65,7 +65,7 @@ export async function removeFromBacklog(gameId: number) {
   }
 
   try {
-    await prisma.backlogGame.delete({
+    await prisma.backlog_games.delete({
       where: {
         userId_gameId: {
           userId: session.user.id,
@@ -90,7 +90,7 @@ export async function updateBacklogStatus(gameId: number, status: BacklogStatus)
   }
 
   try {
-    const updated = await prisma.backlogGame.update({
+    const updated = await prisma.backlog_games.update({
       where: {
         userId_gameId: {
           userId: session.user.id,
@@ -116,7 +116,7 @@ export async function getBacklogStatus(gameId: number) {
   }
 
   try {
-    const entry = await prisma.backlogGame.findUnique({
+    const entry = await prisma.backlog_games.findUnique({
       where: {
         userId_gameId: {
           userId: session.user.id,
@@ -139,7 +139,7 @@ export async function getUserBacklog() {
   }
 
   try {
-    const backlog = await prisma.backlogGame.findMany({
+    const backlog = await prisma.backlog_games.findMany({
       where: { userId: session.user.id },
       orderBy: { updatedAt: 'desc' },
     });
